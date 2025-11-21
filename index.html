@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>女巫镇 - 1692塞勒姆审判</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0A0A0A',
+                        secondary: '#8B0000',
+                        accent: '#D4AF37',
+                        dark: '#1A1A1A',
+                        light: '#E0E0E0',
+                        purple: {
+                            dark: '#2D1B4E',
+                            light: '#5C27FE'
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif']
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* 自定义样式 */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0A0A0A;
+            color: #E0E0E0;
+            overflow-x: hidden;
+        }
+        
+        /* 渐变背景 */
+        .bg-gradient-dark {
+            background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%);
+        }
+        
+        .bg-gradient-purple {
+            background: linear-gradient(135deg, #2D1B4E 0%, #1A1A1A 100%);
+        }
+        
+        /* 金色文字 */
+        .gold-text {
+            color: #D4AF37;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+        
+        /* 霓虹文字 */
+        .neon-text {
+            color: #5C27FE;
+            text-shadow: 0 0 10px rgba(92, 39, 254, 0.7);
+        }
+        
+        /* 按钮样式 */
+        .btn-primary {
+            background: linear-gradient(135deg, #D4AF37 0%, #F5DEB3 100%);
+            color: #0A0A0A;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(212, 175, 55, 0.4);
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.6s ease;
+            z-index: -1;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: #D4AF37;
+            border: 2px solid #D4AF37;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(212, 175, 55, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(212, 175, 55, 0.2);
+        }
+        
+        /* 卡片样式 */
+        .card {
+            background: rgba(26, 26, 26, 0.8);
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-color: rgba(212, 175, 55, 0.3);
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+        }
+        
+        /* 滚动动画 */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        
+        .fade-in.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #0A0A0A;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #D4AF37;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #F5DEB3;
+        }
+        
+        /* 分隔线 */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
+            margin: 3rem 0;
+        }
+        
+        /* 光晕效果 */
+        .glow {
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+        
+        /* 粒子背景 */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        
+        /* 英雄区域 */
+        .hero {
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+        
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(10, 10, 10, 0.5), rgba(10, 10, 10, 0.9));
+            z-index: -1;
+        }
+        
+        /* 游戏特色图标 */
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(212, 175, 55, 0.1) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0.2) 100%);
+        }
+        
+        /* 表单样式 */
+        .form-input {
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            color: #E0E0E0;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #D4AF37;
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .hero {
+                height: auto;
+                min-height: 100vh;
+            }
+        }
+    </style>
+</head>
+<body class="font-inter">
+    <!-- 粒子背景 -->
+    <div id="particles-js"></div>
+    
+    <!-- 导航栏 -->
+    <nav class="navbar fixed top-0 w-full z-50 py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <span class="text-accent text-2xl mr-2"><i class="fas fa-book-of-witchcraft"></i></span>
+                <h1 class="text-2xl font-bold gold-text">Salem 1692</h1>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#home" class="hover:text-accent transition-colors duration-300">首页</a>
+                <a href="#gameplay" class="hover:text-accent transition-colors duration-300">游戏玩法</a>
+                <a href="#thanks" class="hover:text-accent transition-colors duration-300">特别感谢</a>
+                <a href="#contact" class="hover:text-accent transition-colors duration-300">联系我们</a>
+            </div>
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-light focus:outline-none">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-dark/95 mt-2 py-4 px-4 absolute w-full">
+            <div class="flex flex-col space-y-4">
+                <a href="#home" class="hover:text-accent transition-colors duration-300">首页</a>
+                <a href="#gameplay" class="hover:text-accent transition-colors duration-300">游戏玩法</a>
+                <a href="#thanks" class="hover:text-accent transition-colors duration-300">特别感谢</a>
+                <a href="#contact" class="hover:text-accent transition-colors duration-300">联系我们</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主视觉区域 -->
+    <section id="home" class="hero flex items-center justify-center">
+        <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/be0b5a4eaf8a47ad870b323c36f0ac07~tplv-a9rns2rl98-image.image?rcl=202511211526493267063FB378B157303D&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1766302019&x-signature=hcNwmSZy%2FT%2FCBn3aQD%2FSqdjX%2FwM%3D" alt="女巫镇游戏背景" class="hero-bg">
+        <div class="hero-overlay"></div>
+        <div class="container mx-auto px-4 text-center relative z-10">
+            <div class="max-w-3xl mx-auto">
+                <h1 class="text-5xl md:text-7xl font-bold gold-text mb-6 animate-float">女巫镇</h1>
+                <p class="text-2xl md:text-3xl mb-8 neon-text">1692 塞勒姆审判</p>
+                <p class="text-base md:text-lg mb-12 max-w-2xl mx-auto">
+                    一场关于指控、背叛与生存的策略卡牌游戏
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="#contact" class="btn-primary">
+                        联系我们
+                    </a>
+                    <a href="#gameplay" class="btn-secondary">
+                        了解更多
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 游戏玩法 -->
+    <section id="gameplay" class="py-20 bg-gradient-dark">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold gold-text mb-4">游戏玩法</h2>
+                <div class="w-24 h-1 bg-accent mx-auto"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="fade-in">
+                    <p class="text-lg mb-6 leading-relaxed">
+                        多人联机，推理怀疑猜测谋杀一个都不会少。在《女巫镇》中，每位玩家将扮演塞勒姆镇的一名居民，其中部分玩家是隐藏的女巫。通过抽卡和出牌，你可以指控可疑之人，也可以为盟友提供保护。
+                    </p>
+                    <p class="text-lg mb-8 leading-relaxed">
+                        随着游戏进行，怀疑的氛围将越来越浓厚。当"夜晚"来临时，女巫们将行动起来，试图消灭无辜的镇民。而你，能否在这场心理博弈中生存下来，揭露真相？
+                    </p>
+                    <a href="#contact" class="btn-primary inline-block">
+                        联系我们
+                    </a>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="feature-card card p-6 text-center fade-in" style="transition-delay: 0.2s;">
+                        <div class="feature-icon mx-auto">
+                            <i class="fas fa-users text-2xl text-accent"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">多人联机</h3>
+                        <p class="text-gray-400">与朋友一起，体验紧张刺激的多人对战</p>
+                    </div>
+                    
+                    <div class="feature-card card p-6 text-center fade-in" style="transition-delay: 0.4s;">
+                        <div class="feature-icon mx-auto">
+                            <i class="fas fa-search text-2xl text-accent"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">推理怀疑</h3>
+                        <p class="text-gray-400">通过逻辑推理，找出隐藏在人群中的女巫</p>
+                    </div>
+                    
+                    <div class="feature-card card p-6 text-center fade-in" style="transition-delay: 0.6s;">
+                        <div class="feature-icon mx-auto">
+                            <i class="fas fa-question-circle text-2xl text-accent"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">猜测</h3>
+                        <p class="text-gray-400">在信息不足的情况下，做出最明智的判断</p>
+                    </div>
+                    
+                    <div class="feature-card card p-6 text-center fade-in" style="transition-delay: 0.8s;">
+                        <div class="feature-icon mx-auto">
+                            <i class="fas fa-crosshairs text-2xl text-accent"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">谋杀</h3>
+                        <p class="text-gray-400">作为女巫，巧妙地消灭对手而不被发现</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 特别感谢 -->
+    <section id="thanks" class="py-20 bg-gradient-purple">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold gold-text mb-4">特别感谢</h2>
+                <div class="w-24 h-1 bg-accent mx-auto"></div>
+            </div>
+            
+            <div class="card p-8 max-w-4xl mx-auto fade-in">
+                <p class="text-lg mb-6 text-center">
+                    游戏正在紧急开发中，在此特别感谢以下朋友对游戏开发过程中测试BUG的反馈（排名不分前后）：
+                </p>
+                <div class="flex flex-wrap justify-center gap-3">
+                    <span class="bg-purple-dark/30 text-light px-3 py-1 rounded-full text-sm border border-purple-light/20">俊坤</span>
+                    <span class="bg-purple-dark/30 text-light px-3 py-1 rounded-full text-sm border border-purple-light/20">薇薇</span>
+                    <span class="bg-purple-dark/30 text-light px-3 py-1 rounded-full text-sm border border-purple-light/20">李源琦</span>
+                    <span class="bg-purple-dark/30 text-light px-3 py-1 rounded-full text-sm border border-purple-light/20">昊昊</span>
+                    <span class="bg-purple-dark/30 text-light px-3 py-1 rounded-full text-sm border border-purple-light/20">煎饼</span>
+                    <span class="bg-purple-dark/30 text-light px-3 py-1 rounded-full text-sm border border-purple-light/20">洋秘</span>
+                    <span class="bg-purple-dark/30 text-light px-3 py-1 rounded-full text-sm border border-purple-light/20">美女丁</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系我们 -->
+    <section id="contact" class="py-20 bg-gradient-dark">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold gold-text mb-4">联系我们</h2>
+                <div class="w-24 h-1 bg-accent mx-auto"></div>
+                <p class="mt-4 text-lg max-w-2xl mx-auto">扫描下方二维码，关注游戏最新动态</p>
+            </div>
+            
+            <div class="max-w-md mx-auto">
+                <div class="card p-8 glow fade-in text-center">
+                    <div class="mb-8">
+                        <img src="https://p26-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/7ffc8bd27b3e4ea6bd3d287899a928e5.jpg~tplv-a9rns2rl98-24:720:720.image?rcl=202511211534170B0B2AE5BD4C66379EEA&rk3s=8e244e95&rrcfp=8a172a1a&x-expires=1764315257&x-signature=QbyWvNBqlEkEL0NNBvmIMcmYOv0%3D" alt="微信二维码" class="w-64 h-64 mx-auto border-4 border-accent/30 rounded-lg shadow-lg">
+                    </div>
+                    <p class="text-lg gold-text mb-4">欢迎添加微信，了解游戏最新进展</p>
+                    <p class="text-gray-400">我们将定期更新游戏开发进度，分享测试资格</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    
+    <script>
+        // 粒子背景配置
+        document.addEventListener('DOMContentLoaded', function() {
+            particlesJS('particles-js', {
+                "particles": {
+                    "number": {
+                        "value": 80,
+                        "density": {
+                            "enable": true,
+                            "value_area": 800
+                        }
+                    },
+                    "color": {
+                        "value": "#D4AF37"
+                    },
+                    "shape": {
+                        "type": "circle",
+                        "stroke": {
+                            "width": 0,
+                            "color": "#000000"
+                        }
+                    },
+                    "opacity": {
+                        "value": 0.2,
+                        "random": true,
+                        "anim": {
+                            "enable": true,
+                            "speed": 1,
+                            "opacity_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "size": {
+                        "value": 3,
+                        "random": true,
+                        "anim": {
+                            "enable": true,
+                            "speed": 2,
+                            "size_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "line_linked": {
+                        "enable": true,
+                        "distance": 150,
+                        "color": "#D4AF37",
+                        "opacity": 0.1,
+                        "width": 1
+                    },
+                    "move": {
+                        "enable": true,
+                        "speed": 1,
+                        "direction": "none",
+                        "random": true,
+                        "straight": false,
+                        "out_mode": "out",
+                        "bounce": false,
+                        "attract": {
+                            "enable": false,
+                            "rotateX": 600,
+                            "rotateY": 1200
+                        }
+                    }
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": {
+                        "onhover": {
+                            "enable": true,
+                            "mode": "grab"
+                        },
+                        "onclick": {
+                            "enable": true,
+                            "mode": "push"
+                        },
+                        "resize": true
+                    },
+                    "modes": {
+                        "grab": {
+                            "distance": 140,
+                            "line_linked": {
+                                "opacity": 0.3
+                            }
+                        },
+                        "push": {
+                            "particles_nb": 3
+                        }
+                    }
+                },
+                "retina_detect": true
+            });
+        });
+        
+        // 移动端菜单切换
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // 滚动动画
+        document.addEventListener('DOMContentLoaded', function() {
+            const fadeElements = document.querySelectorAll('.fade-in');
+            
+            function checkFade() {
+                fadeElements.forEach(element => {
+                    const elementTop = element.getBoundingClientRect().top;
+                    const elementVisible = 150;
+                    
+                    if (elementTop < window.innerHeight - elementVisible) {
+                        element.classList.add('active');
+                    }
+                });
+            }
+            
+            window.addEventListener('scroll', checkFade);
+            checkFade(); // 初始检查
+        });
+        
+        // 表单提交
+        document.getElementById('signup-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const platform = document.getElementById('platform').value;
+            
+            if (!name || !email || !platform) {
+                alert('请填写完整信息');
+                return;
+            }
+            
+            // 模拟表单提交
+            alert(`感谢 ${name} 的预约！我们将通过 ${email} 通知您游戏测试的最新消息。`);
+            
+            // 重置表单
+            this.reset();
+        });
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    // 如果是移动端，点击后关闭菜单
+                    const mobileMenu = document.getElementById('mobile-menu');
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
