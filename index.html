@@ -1975,8 +1975,8 @@
                              <LandingButton onClick={() => { setIsHost(false); setView(View.JOIN_ROOM); }} icon={UserPlus} label="加入房间" color="brown" />
                              <LandingButton onClick={startSetupHost} icon={Users} label="好友对战" color="purple" />
                              <LandingButton onClick={() => setView(View.RULES)} icon={BookOpen} label="游戏规则" color="dark" />
-                             <LandingButton onClick={() => setIsSettingsOpen(true)} icon={Settings} label="游戏设置" color="dark" />
                              <LandingButton onClick={() => setIsAnnouncementsOpen(true)} icon={Volume2} label="小镇公告" color="dark" />
+                             <LandingButton onClick={() => setIsSettingsOpen(true)} icon={Settings} label="游戏设置" color="dark" />
                         </div>
                     </div>
                 </div>
@@ -2019,6 +2019,11 @@
                              
                              <p className="text-center text-[#b45309] font-bold mt-4">✨ 后续将持续更新游戏内容，敬请期待！——女巫镇镇长 Mr. Junnan</p>
                          </div>
+                         <div className="mt-6 text-center">
+                             <button onClick={() => setView(View.LANDING)} className="bg-[#78350f] text-[#e7e5e4] px-6 py-2 rounded font-bold hover:bg-[#92400e] transition-colors border border-[#451a03]">
+                                我知道了
+                            </button>
+                        </div>
                      </div>
                  </div>
             );
