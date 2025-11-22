@@ -94,7 +94,7 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef } from 'react';
         import { createRoot } from 'react-dom/client';
-        import { Shield, Skull, Zap, Eye, Users, Moon, Gavel, Search, Lock, Heart, Home, Cat, RotateCcw, BookOpen, Play, Hand, X, Layers, Scale, Copy, Check, UserPlus, Crown, Volume2, Settings, Music } from 'lucide-react';
+        import { Shield, Skull, Zap, Eye, Users, Moon, Gavel, Search, Lock, Heart, Home, Cat, RotateCcw, BookOpen, Play, Hand, X, Layers, Scale, Copy, Check, UserPlus, Crown, Volume2, Settings, Music, Link } from 'lucide-react';
 
         // --- Constants & Types ---
 
@@ -411,8 +411,8 @@
 
             const effectiveRole = getEffectiveRole(player, allPlayers);
 
-            // Reduced size slightly to fit 4 in a row on smaller screens
-            const sizeClass = "w-16 md:w-20";
+            // Compact size for 4-column layout on mobile
+            const sizeClass = "w-12 md:w-16"; 
             
             const isRevealTarget = revealMode && isTargetable; 
             const isGirlTarget = girlTrialMode && !player.isDead && player.id !== myPlayerId;
@@ -435,7 +435,7 @@
                     `}
                 >
                     {/* Role Title Header */}
-                    <div className={`w-full bg-[#292524] text-center py-0.5 text-[#a8a29e] font-bold truncate px-1 border-b border-[#44403c] text-[9px] md:text-[10px] font-serif tracking-wide`}>
+                    <div className={`w-full bg-[#292524] text-center py-0.5 text-[#a8a29e] font-bold truncate px-1 border-b border-[#44403c] text-[7px] md:text-[9px] font-serif tracking-wide`}>
                         {effectiveRole.name}
                     </div>
 
@@ -454,7 +454,7 @@
                         
                         {/* Player Name Overlay */}
                         {player.name && (
-                             <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-[#e7e5e4] text-[8px] text-center truncate px-1 py-0.5">
+                             <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-[#e7e5e4] text-[7px] text-center truncate px-1 py-0.5">
                                  {player.name}
                              </div>
                         )}
@@ -468,48 +468,48 @@
                         {!isMe && !player.isDead && (
                             <div className="absolute top-0.5 left-0.5 bg-black/80 rounded px-1 py-0.5 flex items-center gap-0.5 border border-[#44403c] shadow-sm">
                                 <div className="w-2 h-3 bg-[#57534e] rounded-[1px] border border-[#a8a29e]"></div>
-                                <span className="text-[10px] font-bold text-white">{player.hand.length}</span>
+                                <span className="text-[8px] font-bold text-white">{player.hand.length}</span>
                             </div>
                         )}
 
                         <div className="absolute top-0.5 right-0.5 flex flex-col gap-0.5 items-end">
                             {hasBlackCat && (
-                                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-[#2e1065] border border-purple-400 flex items-center justify-center shadow-[0_0_15px_#a855f7] z-20">
-                                    <Cat className="w-2.5 h-2.5 md:w-3 md:h-3 text-purple-200" />
+                                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-[#2e1065] border border-purple-400 flex items-center justify-center shadow-[0_0_15px_#a855f7] z-20">
+                                    <Cat className="w-2 h-2 md:w-2.5 md:h-2.5 text-purple-200" />
                                 </div>
                             )}
                             {isProtected && (
-                                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-[#1e3a8a] border border-blue-300 flex items-center justify-center shadow-md z-20">
-                                    <Shield className="w-2.5 h-2.5 md:w-3 md:h-3 text-blue-200" />
+                                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-[#1e3a8a] border border-blue-300 flex items-center justify-center shadow-md z-20">
+                                    <Shield className="w-2 h-2 md:w-2.5 md:h-2.5 text-blue-200" />
                                 </div>
                             )}
                             {hasMatchmaker && (
-                                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-[#831843] border border-pink-300 flex items-center justify-center shadow-md">
-                                    <Heart className="w-2.5 h-2.5 md:w-3 md:h-3 text-pink-200" />
+                                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-[#831843] border border-pink-300 flex items-center justify-center shadow-md">
+                                    <Heart className="w-2 h-2 md:w-2.5 md:h-2.5 text-pink-200" />
                                 </div>
                             )}
                             {hasAsylum && (
-                                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-[#14532d] border border-green-300 flex items-center justify-center shadow-md">
-                                    <Home className="w-2.5 h-2.5 md:w-3 md:h-3 text-green-200" />
+                                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-[#14532d] border border-green-300 flex items-center justify-center shadow-md">
+                                    <Home className="w-2 h-2 md:w-2.5 md:h-2.5 text-green-200" />
                                 </div>
                             )}
                             {hasAlibi && (
-                                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-[#134e4a] border border-teal-300 flex items-center justify-center shadow-md">
-                                    <Users className="w-2.5 h-2.5 md:w-3 md:h-3 text-teal-200" />
+                                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-[#134e4a] border border-teal-300 flex items-center justify-center shadow-md">
+                                    <Users className="w-2 h-2 md:w-2.5 md:h-2.5 text-teal-200" />
                                 </div>
                             )}
                         </div>
                     </div>
 
                     {/* Accusation Bar */}
-                    <div className="w-full min-h-[14px] flex flex-wrap justify-center items-center bg-[#292524] border-t border-b border-[#44403c] px-0.5 py-0.5">
+                    <div className="w-full min-h-[10px] flex flex-wrap justify-center items-center bg-[#292524] border-t border-b border-[#44403c] px-0.5 py-0.5">
                         {Array.from({ length: player.accusations }).map((_, i) => (
-                            <span key={i} className="text-[8px] text-[#dc2626] font-bold leading-none mx-[1px]">✕</span>
+                            <span key={i} className="text-[6px] text-[#dc2626] font-bold leading-none mx-[1px]">✕</span>
                         ))}
                     </div>
 
                     {/* Identity Cards Row */}
-                    <div className="w-full flex justify-center gap-0.5 p-0.5 bg-[#1c1917] border-t border-[#44403c] h-6 items-center">
+                    <div className="w-full flex justify-center gap-0.5 p-0.5 bg-[#1c1917] border-t border-[#44403c] h-5 items-center">
                         {player.identityCards.map((card, idx) => {
                             const identityLabel = card.identity === Identity.WITCH ? '巫' : card.identity === Identity.CONSTABLE ? '警' : '民';
                             
@@ -542,7 +542,7 @@
                                 <div 
                                     key={idx}
                                     className={`
-                                        w-3 h-5 rounded-[2px] border text-[8px] flex items-center justify-center leading-none font-bold font-serif
+                                        w-2.5 h-4 rounded-[1px] border text-[6px] flex items-center justify-center leading-none font-bold font-serif
                                         ${styleClass}
                                     `}
                                 >
@@ -568,6 +568,7 @@
             const [connections, setConnections] = useState([]); // For Host: List of connections
             const [connectedPlayers, setConnectedPlayers] = useState([]); // List of { peerId, name, isReady }
             const [hostConn, setHostConn] = useState(null); // For Guest: Connection to Host
+            const [isJoining, setIsJoining] = useState(false);
 
             // Setup State
             const [playerCount, setPlayerCount] = useState(7);
@@ -615,6 +616,17 @@
                 toastTimeoutRef.current = setTimeout(() => setSystemMessage(null), duration);
             };
 
+            // --- Initialization: URL Params ---
+            useEffect(() => {
+                const params = new URLSearchParams(window.location.search);
+                const inviteRoomId = params.get('room');
+                if (inviteRoomId) {
+                    setRoomId(inviteRoomId);
+                    setView(View.JOIN_ROOM);
+                    showToast("已自动填入房间号，请输入名字加入");
+                }
+            }, []);
+
             // --- Audio Logic ---
             useEffect(() => {
                 if(audioRef.current) {
@@ -629,6 +641,25 @@
                          }
                     }
                 }
+            }, [bgmVolume]);
+
+            // --- Autoplay Fallback Logic ---
+            useEffect(() => {
+                const unlockAudio = () => {
+                    if (audioRef.current && audioRef.current.paused && bgmVolume > 0) {
+                        audioRef.current.play().catch(() => {});
+                    }
+                };
+                // Capture first interaction to unlock audio context if autoplay failed
+                window.addEventListener('click', unlockAudio, { once: true });
+                window.addEventListener('touchstart', unlockAudio, { once: true });
+                window.addEventListener('keydown', unlockAudio, { once: true });
+
+                return () => {
+                    window.removeEventListener('click', unlockAudio);
+                    window.removeEventListener('touchstart', unlockAudio);
+                    window.removeEventListener('keydown', unlockAudio);
+                };
             }, [bgmVolume]);
 
             // --- Networking Logic ---
@@ -680,25 +711,54 @@
                 if (!myDisplayName.trim()) { showToast("请输入你的名字"); return; }
                 if (!roomId.trim()) { showToast("请输入房间号"); return; }
                 
+                setIsJoining(true);
+                showToast("正在尝试连接...", 2000);
+
                 const p = initPeer();
                 setIsHost(false);
+
+                // Timeout handler
+                const connectionTimeout = setTimeout(() => {
+                    if (isJoining) {
+                        setIsJoining(false);
+                        showToast("连接超时。请检查房间号或网络状况 (建议在同WiFi下尝试)", 5000);
+                    }
+                }, 10000);
                 
                 const connect = () => {
-                    const conn = p.connect(roomId);
+                    if (hostConn) hostConn.close();
+
+                    const conn = p.connect(roomId, { reliable: true });
                     conn.on('open', () => {
+                        clearTimeout(connectionTimeout);
+                        setIsJoining(false);
                         setHostConn(conn);
                         conn.send({ type: 'JOIN', name: myDisplayName });
                         setView(View.WAITING_ROOM);
+                        showToast("成功加入房间!");
                     });
                     conn.on('data', (data) => handleGuestData(data));
-                    conn.on('close', () => { showToast("与房主断开连接"); setView(View.LANDING); });
-                    conn.on('error', () => { showToast("连接失败"); });
+                    conn.on('close', () => { 
+                        showToast("与房主断开连接"); 
+                        setView(View.LANDING); 
+                        setHostConn(null);
+                    });
+                    conn.on('error', (err) => { 
+                         clearTimeout(connectionTimeout);
+                         setIsJoining(false);
+                         showToast("连接失败: " + err); 
+                    });
                 };
 
                 if (p.open) {
                     connect();
                 } else {
-                    p.on('open', connect);
+                    p.once('open', connect);
+                    p.on('error', (err) => {
+                        clearTimeout(connectionTimeout);
+                        setIsJoining(false);
+                        showToast("Peer初始化失败: " + err.type);
+                    });
                 }
             };
 
@@ -1834,9 +1894,15 @@
                         </div>
                         <button 
                            onClick={joinRoom}
-                           className="w-full py-3 bg-[#1e3a8a] hover:bg-[#1e40af] text-[#f5f5dc] font-bold text-base rounded shadow transition-colors border border-[#172554] font-serif"
+                           disabled={isJoining}
+                           className={`w-full py-3 font-bold text-base rounded shadow transition-colors border font-serif
+                               ${isJoining 
+                                    ? 'bg-[#44403c] text-[#a8a29e] border-[#292524] cursor-not-allowed'
+                                    : 'bg-[#1e3a8a] hover:bg-[#1e40af] text-[#f5f5dc] border-[#172554]'
+                               }
+                           `}
                         >
-                            加入游戏
+                            {isJoining ? "连接中..." : "加入游戏"}
                         </button>
                         <button onClick={() => setView(View.LANDING)} className="w-full mt-2 text-xs text-[#a8a29e] hover:underline text-center">返回</button>
                      </div>
@@ -1849,66 +1915,82 @@
                     navigator.clipboard.writeText(roomId);
                     showToast("房间号已复制!");
                 };
+                const copyInviteLink = () => {
+                    const url = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
+                    navigator.clipboard.writeText(url);
+                    showToast("邀请链接已复制!");
+                };
                 
                 return (
-                    <div className="min-h-screen flex flex-col items-center p-4 bg-transparent">
-                         <div className="w-full max-w-4xl glass-panel rounded-lg p-6 mt-10 shadow-2xl relative min-h-[500px] flex flex-col bg-[#1c1917]/90">
-                             <div className="flex justify-between items-center border-b border-[#78350f] pb-4 mb-6">
+                    <div className="min-h-screen flex flex-col items-center justify-center p-2 bg-transparent">
+                         <div className="w-full max-w-lg glass-panel rounded-lg p-3 shadow-2xl relative flex flex-col bg-[#1c1917]/95 max-h-[90vh] overflow-hidden">
+                             {/* Header */}
+                             <div className="flex justify-between items-center border-b border-[#78350f] pb-2 mb-2 shrink-0">
                                  <div>
-                                     <h2 className="text-2xl font-serif font-bold text-[#e7e5e4]">游戏房间</h2>
-                                     <div className="flex items-center gap-2 text-sm text-[#a8a29e] mt-1">
-                                         <span>房间ID: {roomId}</span>
-                                         <button onClick={copyRoomId} className="p-1 hover:bg-[#292524] rounded"><Copy size={14}/></button>
+                                     <h2 className="text-lg font-serif font-bold text-[#e7e5e4]">游戏房间</h2>
+                                     <div className="flex items-center gap-2 text-xs text-[#a8a29e] mt-0.5">
+                                         <span className="truncate max-w-[120px]">ID: {roomId}</span>
+                                         <button onClick={copyRoomId} className="p-1 hover:bg-[#292524] rounded border border-[#44403c] bg-[#0c0a09] text-[#e7e5e4] flex items-center gap-1 px-2 scale-90 origin-left">
+                                             <Copy size={10}/> 复制
+                                         </button>
                                      </div>
                                  </div>
-                                 <button onClick={() => setView(View.LANDING)} className="text-[#991b1b] hover:underline text-sm font-bold">离开</button>
+                                 <button onClick={() => setView(View.LANDING)} className="text-[#991b1b] hover:underline text-xs font-bold px-2 py-1">离开</button>
                              </div>
                              
-                             <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 content-start">
-                                 {connectedPlayers.map((p, i) => (
-                                     <div key={i} className="flex flex-col items-center p-4 bg-[#292524] rounded border border-[#44403c] relative">
-                                         <div className="w-16 h-16 rounded-full bg-[#78350f] text-[#e6e0d4] flex items-center justify-center text-2xl font-bold mb-2 shadow-inner">
-                                             {p.name[0]}
+                             {/* Grid Area - Scrollable if needed */}
+                             <div className="flex-1 overflow-y-auto min-h-0">
+                                 <div className="grid grid-cols-4 gap-1.5 content-start pb-2">
+                                     {connectedPlayers.map((p, i) => (
+                                         <div key={i} className="flex flex-col items-center justify-center p-1.5 bg-[#292524] rounded border border-[#44403c] relative aspect-square">
+                                             <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-[#78350f] text-[#e6e0d4] flex items-center justify-center text-xs font-bold mb-1 shadow-inner shrink-0">
+                                                 {p.name[0]}
+                                             </div>
+                                             <span className="font-bold text-[#e7e5e4] truncate w-full text-center text-[9px] md:text-[10px] leading-tight">{p.name}</span>
+                                             {p.isHost && <span className="absolute top-0.5 right-0.5 text-yellow-600"><Crown size={8} /></span>}
+                                             {p.isReady && <span className="absolute top-0.5 left-0.5 text-green-600"><Check size={8} /></span>}
                                          </div>
-                                         <span className="font-bold text-[#e7e5e4] truncate w-full text-center">{p.name}</span>
-                                         {p.isHost && <span className="absolute top-2 right-2 text-yellow-600"><Crown size={16} /></span>}
-                                         {p.isReady && <span className="absolute top-2 left-2 text-green-600"><Check size={16} /></span>}
-                                     </div>
-                                 ))}
-                                 
-                                 {Array.from({length: Math.max(0, playerCount - connectedPlayers.length)}).map((_, i) => (
-                                      <div key={`empty-${i}`} className="flex flex-col items-center p-4 border-2 border-dashed border-[#44403c] rounded opacity-50 justify-center">
-                                          <span className="text-[#78716c] text-sm">等待加入...</span>
-                                      </div>
-                                 ))}
+                                     ))}
+                                     
+                                     {Array.from({length: Math.max(0, playerCount - connectedPlayers.length)}).map((_, i) => (
+                                          <div key={`empty-${i}`} className="flex flex-col items-center justify-center p-1 border border-dashed border-[#44403c] rounded opacity-40 aspect-square bg-[#0c0a09]/50">
+                                              <span className="text-[#78716c] text-[9px]">空位</span>
+                                          </div>
+                                     ))}
+                                 </div>
                              </div>
                              
-                             <div className="mt-6 border-t border-[#78350f] pt-6 flex justify-between items-center">
-                                 <button onClick={copyRoomId} className="flex items-center gap-2 text-[#1e3a8a] font-bold hover:underline">
-                                     <UserPlus size={20}/> 邀请好友
-                                 </button>
+                             {/* Footer Actions */}
+                             <div className="mt-2 border-t border-[#78350f] pt-3 shrink-0 flex flex-col gap-2">
                                  
+                                 {/* Invite Link Button - Full Width */}
+                                 <button onClick={copyInviteLink} className="w-full flex items-center justify-center gap-2 text-[#1e3a8a] font-bold hover:underline bg-[#172554]/50 hover:bg-[#172554] py-2 rounded border border-[#1e3a8a] text-[#bfdbfe] text-xs transition-colors">
+                                     <Link size={12}/> 点击复制邀请链接发送给好友
+                                 </button>
+
+                                 {/* Start / Ready Button - Full Width */}
                                  {isHost ? (
                                      <button 
                                          onClick={launchGameSetup}
                                          disabled={!allReady}
-                                         className={`px-8 py-3 rounded font-bold text-lg shadow-lg border border-transparent transition-all
+                                         className={`w-full py-2.5 rounded font-bold text-sm shadow-lg border border-transparent transition-all flex items-center justify-center gap-2
                                             ${allReady ? 'bg-[#15803d] hover:bg-[#166534] text-white border-[#052e16]' : 'bg-[#44403c] text-[#a8a29e] cursor-not-allowed'}
                                          `}
                                      >
-                                         开始游戏
+                                         <Play size={14} /> 开始游戏 ({connectedPlayers.length}/{playerCount})
                                      </button>
                                  ) : (
                                      <button 
                                          onClick={() => {
                                              if(hostConn) hostConn.send({ type: 'READY_TOGGLE', isReady: !connectedPlayers.find(p => p.name === myDisplayName)?.isReady });
                                          }}
-                                         className={`px-8 py-3 rounded font-bold text-lg shadow-lg border transition-all
+                                         className={`w-full py-2.5 rounded font-bold text-sm shadow-lg border transition-all flex items-center justify-center gap-2
                                              ${connectedPlayers.find(p => p.name === myDisplayName)?.isReady 
                                                 ? 'bg-[#292524] text-[#15803d] border-[#15803d]' 
                                                 : 'bg-[#15803d] text-white border-[#052e16] hover:bg-[#166534]'}
                                          `}
                                      >
+                                         {connectedPlayers.find(p => p.name === myDisplayName)?.isReady ? <Check size={14}/> : <Play size={14}/>}
                                          {connectedPlayers.find(p => p.name === myDisplayName)?.isReady ? "已准备" : "准备"}
                                      </button>
                                  )}
@@ -1996,7 +2078,7 @@
                         {/* Game Area - 4 Column Grid for 12 Players (3 rows) */}
                         <div className="flex-1 relative pointer-events-auto flex flex-col">
                             <div className="flex-1 flex items-center justify-center pb-32 overflow-y-auto">
-                                <div className="grid grid-cols-4 gap-x-4 gap-y-2 md:gap-x-8 md:gap-y-4 max-w-5xl mx-auto p-4">
+                                <div className="grid grid-cols-4 gap-x-2 gap-y-2 md:gap-x-8 md:gap-y-4 max-w-5xl mx-auto p-4">
                                     {players.map(p => {
                                         if (p.id === myPlayerId) return null;
                                         
@@ -2185,7 +2267,7 @@
             return (
                 <>
                     {/* BGM Audio Element */}
-                    <audio ref={audioRef} src="./assets/bgm.mp3" loop />
+                    <audio ref={audioRef} src="./assets/bgm.mp3" loop autoPlay />
 
                     {isSettingsOpen && (
                         <SettingsModal 
