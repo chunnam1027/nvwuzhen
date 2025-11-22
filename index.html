@@ -94,7 +94,7 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef } from 'react';
         import { createRoot } from 'react-dom/client';
-        import { Shield, Skull, Zap, Eye, Users, Moon, Gavel, Search, Lock, Heart, Home, Cat, RotateCcw, BookOpen, Play, Hand, X, Layers, Scale, Copy, Check, UserPlus, Crown, Volume2, Settings, Music, Link } from 'lucide-react';
+        import { Shield, Skull, Zap, Eye, Users, Moon, Gavel, Search, Lock, Heart, Home, Cat, RotateCcw, BookOpen, Play, Hand, X, Layers, Scale, Copy, Check, UserPlus, Crown, Volume2, Settings, Music, Link, Loader2, Info } from 'lucide-react';
 
         // --- Constants & Types ---
 
@@ -347,6 +347,39 @@
             );
         };
 
+        const AnnouncementsModal = ({ onClose }) => (
+            <div className="fixed inset-0 z-[300] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+                <div className="bg-[#1c1917] p-8 rounded shadow-xl border-2 border-[#78350f] relative overflow-y-auto max-h-[80vh] max-w-3xl w-full">
+                    <button onClick={onClose} className="absolute top-4 right-4 text-[#a8a29e] hover:text-white p-1">
+                        <X />
+                    </button>
+                    <h3 className="text-2xl font-serif font-bold text-center mb-6 text-[#e7e5e4] tracking-widest">
+                        小镇公告
+                    </h3>
+                    <div className="space-y-4 font-serif text-[#a8a29e]">
+                        <div className="bg-[#292524] p-4 rounded border border-[#44403c]">
+                            <p className="mb-2"><strong className="text-[#b45309]">1. 联机说明：</strong></p>
+                            <p className="text-sm">游戏目前联机对战还有严重BUG，如果大家想和朋友对战可以开热点或者在同一wifi下可以进入房间进行对战。</p>
+                        </div>
+                        <div className="bg-[#292524] p-4 rounded border border-[#44403c]">
+                            <p className="mb-2"><strong className="text-[#b45309]">2. 开发说明：</strong></p>
+                            <p className="text-sm mb-2">游戏现在还属于开发阶段，角色技能还有卡牌效果等还有很多问题等待修复。</p>
+                            <p className="text-sm">有任何建议或者BUG反馈都可以发送至：</p>
+                            <ul className="text-sm mt-1 space-y-1 text-[#e7e5e4]">
+                                <li>微信: <span className="select-all">aonlyxu</span></li>
+                                <li>E-mail: <span className="select-all">nanzi_07@qq.com</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div className="mt-6 text-center">
+                         <button onClick={onClose} className="bg-[#78350f] text-[#e7e5e4] px-6 py-2 rounded font-bold hover:bg-[#92400e] transition-colors border border-[#451a03]">
+                            我知道了
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+
         const Card = ({ card, isSelected, onClick, disabled, small }) => {
             const getCardStyle = (type) => {
                 switch (type) {
@@ -580,7 +613,11 @@
             const [charChoices, setCharChoices] = useState([]);
             const [availablePool, setAvailablePool] = useState([]); // Store characters NOT offered to human
             const [takenCharacters, setTakenCharacters] = useState([]); // List of IDs
+            const [playerSelections, setPlayerSelections] = useState({}); // Map { peerId: charId }
+            const [hasSelectedChar, setHasSelectedChar] = useState(false);
             
+            const playerSelectionsRef = useRef({});
+
             // Game State (Synced)
             const [phase, setPhase] = useState(Phase.INITIAL_NIGHT);
             const [players, setPlayers] = useState([]);
@@ -598,6 +635,7 @@
             const [identitySelectionTargetId, setIdentitySelectionTargetId] = useState(null);
             const [girlTrialMode, setGirlTrialMode] = useState(false);
             const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+            const [isAnnouncementsOpen, setIsAnnouncementsOpen] = useState(false);
             const [bgmVolume, setBgmVolume] = useState(0.5);
             
             // Night/Voting State
@@ -618,6 +656,7 @@
             useEffect(() => { connectionsRef.current = connections; }, [connections]);
             useEffect(() => { connectedPlayersRef.current = connectedPlayers; }, [connectedPlayers]);
             useEffect(() => { playerCountRef.current = playerCount; }, [playerCount]);
+            useEffect(() => { playerSelectionsRef.current = playerSelections; }, [playerSelections]);
 
             // --- Toast Logic ---
             const showToast = (msg, duration = 4000) => {
@@ -642,7 +681,6 @@
                 if(audioRef.current) {
                     audioRef.current.volume = bgmVolume;
                     if (bgmVolume > 0 && audioRef.current.paused) {
-                         // Attempt to play automatically, though browsers may block this without interaction
                          const playPromise = audioRef.current.play();
                          if (playPromise !== undefined) {
                              playPromise.catch(error => {
@@ -660,7 +698,6 @@
                         audioRef.current.play().catch(() => {});
                     }
                 };
-                // Capture first interaction to unlock audio context if autoplay failed
                 window.addEventListener('click', unlockAudio, { once: true });
                 window.addEventListener('touchstart', unlockAudio, { once: true });
                 window.addEventListener('keydown', unlockAudio, { once: true });
@@ -674,17 +711,12 @@
 
             // --- Networking Logic ---
 
-            // Initialize Peer on Lobby Entrance or demand
             const initPeer = () => {
                 if (peer && !peer.destroyed) {
-                    if (peer.disconnected) {
-                        console.log("Peer disconnected, reconnecting...");
-                        peer.reconnect();
-                    }
+                    if (peer.disconnected) peer.reconnect();
                     return peer;
                 }
 
-                // PeerJS config - adding STUN servers to improve connectivity
                 const newPeer = new window.Peer(null, { 
                     debug: 2,
                     config: {
@@ -692,7 +724,8 @@
                             { urls: 'stun:stun.l.google.com:19302' },
                             { urls: 'stun:stun1.l.google.com:19302' },
                             { urls: 'stun:stun2.l.google.com:19302' },
-                            { urls: 'stun:stun3.l.google.com:19302' }
+                            { urls: 'stun:stun3.l.google.com:19302' },
+                            { urls: 'stun:stun4.l.google.com:19302' }
                         ]
                     }
                 });
@@ -703,36 +736,22 @@
                 });
 
                 newPeer.on('disconnected', () => {
-                    console.log("Peer disconnected from server.");
-                    // Workaround for PeerJS issue where it doesn't always reconnect automatically
                     if (!newPeer.destroyed) {
-                        // Try reconnecting shortly after disconnect
                         setTimeout(() => {
-                            if (newPeer.disconnected && !newPeer.destroyed) {
-                                console.log("Attempting reconnection...");
-                                newPeer.reconnect();
-                            }
+                            if (newPeer.disconnected && !newPeer.destroyed) newPeer.reconnect();
                         }, 1000);
                     }
                 });
 
                 newPeer.on('close', () => {
-                    console.log("Peer closed locally.");
                     setPeer(null);
                 });
 
                 newPeer.on('error', (err) => {
-                    console.error("Peer Error:", err);
-                    
                     let msg = "网络错误";
-                    if (err.type === 'peer-unavailable') {
-                        msg = "找不到该房间或房主已离线";
-                    } else if (err.type === 'network' || err.type === 'server-error' || err.type === 'socket-error' || err.type === 'socket-closed') {
-                         msg = "连接断开，正在尝试重连...";
-                    } else if (err.type === 'unavailable-id') {
-                        msg = "ID已被占用，请刷新重试";
-                    }
-
+                    if (err.type === 'peer-unavailable') msg = "找不到该房间或房主已离线";
+                    else if (err.type === 'unavailable-id') msg = "ID已被占用，请刷新重试";
+                    else if (err.type === 'network' || err.type === 'server-error') msg = "网络连接失败，请尝试切换WiFi/热点";
                     showToast(`${msg} (${err.type})`);
                 });
 
@@ -744,7 +763,7 @@
                 if (!myDisplayName.trim()) { showToast("请输入你的名字"); return; }
                 const p = initPeer();
                 setIsHost(true);
-                setConnections([]); // Clear previous connections
+                setConnections([]); 
 
                 const onOpen = (id) => {
                     setRoomId(id);
@@ -752,13 +771,9 @@
                     setView(View.WAITING_ROOM);
                 };
 
-                if (p.open) {
-                    onOpen(p.id);
-                } else {
-                    p.on('open', onOpen);
-                }
+                if (p.open) onOpen(p.id);
+                else p.on('open', onOpen);
                 
-                // Ensure we don't have duplicate listeners if peer is reused
                 p.off('connection');
                 p.on('connection', (conn) => {
                     conn.on('data', (data) => handleHostData(data, conn));
@@ -778,7 +793,6 @@
                 const p = initPeer();
                 setIsHost(false);
 
-                // Timeout handler
                 const connectionTimeout = setTimeout(() => {
                     if (isJoining) {
                         setIsJoining(false);
@@ -788,7 +802,6 @@
                 
                 const connect = () => {
                     if (hostConn) hostConn.close();
-
                     const conn = p.connect(roomId, { reliable: true });
                     conn.on('open', () => {
                         clearTimeout(connectionTimeout);
@@ -811,9 +824,8 @@
                     });
                 };
 
-                if (p.open) {
-                    connect();
-                } else {
+                if (p.open) connect();
+                else {
                     p.once('open', connect);
                     p.on('error', (err) => {
                         clearTimeout(connectionTimeout);
@@ -831,9 +843,6 @@
                         const currentConnected = connectedPlayersRef.current;
                         const updated = [...currentConnected, newPlayer];
                         setConnectedPlayers(updated);
-                        
-                        // Immediate reply to the new joining connection with current state
-                        // Use refs to ensure we are sending the current settings, not initial defaults
                         if (conn.open) {
                              conn.send({ 
                                 type: 'ROOM_UPDATE', 
@@ -841,8 +850,6 @@
                                 playerCount: playerCountRef.current 
                             });
                         }
-
-                        // Broadcast to others
                         const otherConns = connectionsRef.current.filter(c => c.peer !== conn.peer);
                         broadcastToAll(otherConns, { type: 'ROOM_UPDATE', players: updated, playerCount: playerCountRef.current });
                         break;
@@ -854,12 +861,21 @@
                     case 'GAME_ACTION':
                         console.log("Host received action:", data.action);
                         break;
-                    case 'CHAR_SELECT':
+                    case 'SELECT_CHAR':
                         if (takenCharacters.includes(data.charId)) {
                              conn.send({ type: 'ERROR', msg: '该角色已被选择' });
                         } else {
-                             setTakenCharacters(prev => [...prev, data.charId]);
-                             // Need to implement broadcast for taken chars if we want realtime updates there too
+                             const newSelections = { ...playerSelectionsRef.current, [conn.peer]: data.charId };
+                             setPlayerSelections(newSelections);
+                             const taken = Object.values(newSelections);
+                             setTakenCharacters(taken);
+                             broadcastToAll(connectionsRef.current, { type: 'TAKEN_UPDATE', taken: taken });
+                             
+                             // Check if all humans have selected
+                             const humansCount = connectedPlayersRef.current.length;
+                             if (Object.keys(newSelections).length === humansCount) {
+                                 hostStartGame(newSelections);
+                             }
                         }
                         break;
                 }
@@ -877,14 +893,43 @@
                         if (data.choices) {
                              setCharChoices(data.choices);
                         }
+                        setHasSelectedChar(false);
+                        setTakenCharacters([]);
                         setView(View.CHAR_SELECT);
+                        break;
+                    case 'ERROR':
+                        showToast(data.msg);
+                        setHasSelectedChar(false);
                         break;
                     case 'GAME_STATE_UPDATE':
                         if(data.state.players) setPlayers(data.state.players);
                         if(data.state.phase) setPhase(data.state.phase);
                         break;
-                    case 'TAKEN_CHARS_UPDATE':
+                    case 'TAKEN_UPDATE':
                         setTakenCharacters(data.taken);
+                        break;
+                    case 'GAME_START':
+                        // Synchronized Start
+                        const { players: syncedPlayers, deck: syncedDeck, phase: syncedPhase } = data;
+                        setPlayers(syncedPlayers);
+                        setDeck(syncedDeck);
+                        setPhase(syncedPhase);
+                        setDiscardPile([]);
+                        setCurrentPlayerIndex(0);
+                        setWitchVotes({});
+                        
+                        // Identify Self
+                        const myIndex = syncedPlayers.findIndex(p => p.peerId === myPeerId);
+                        setMyPlayerId(myIndex !== -1 ? myIndex : 0);
+                        
+                        setView(View.GAME);
+                        
+                        const me = syncedPlayers[myIndex !== -1 ? myIndex : 0];
+                        const myIdentities = me.identityCards;
+                        const isWitch = myIdentities.some(c => c.identity === Identity.WITCH);
+                        if (isWitch) showToast('天黑了... 你是女巫! 请放置黑猫。', 5000);
+                        else if (myIdentities.some(c => c.identity === Identity.CONSTABLE)) showToast('天黑了... 你是警长! 女巫正在行动。', 5000);
+                        else showToast('天黑了... 你是平民。女巫正在行动。', 5000);
                         break;
                 }
             };
@@ -902,36 +947,27 @@
 
             const launchGameSetup = () => {
                 if (isHost) {
-                    // 1. Shuffle all characters
-                    const shuffled = shuffle([...CHARACTERS]);
-                    let currentIndex = 0;
+                    // Use full character pool so everyone sees the same choices
+                    const pool = [...CHARACTERS];
+                    setCharChoices(pool);
                     
-                    // 2. Determine number of choices per player (2 if < 7 players, else 1)
-                    const count = playerCount;
-                    const choicesPerPlayer = count < 7 ? 2 : 1;
+                    setHasSelectedChar(false);
+                    setPlayerSelections({});
+                    setTakenCharacters([]);
 
-                    // 3. Assign for Host
-                    const hostChoices = shuffled.slice(currentIndex, currentIndex + choicesPerPlayer);
-                    currentIndex += choicesPerPlayer;
-                    setCharChoices(hostChoices);
-
-                    // 4. Assign for Guests and Broadcast
                     connectedPlayersRef.current.forEach(p => {
                         if (p.isHost) return; 
-                        
                         const conn = connectionsRef.current.find(c => c.peer === p.peerId);
                         if (conn) {
-                            const guestChoices = shuffled.slice(currentIndex, currentIndex + choicesPerPlayer);
-                            currentIndex += choicesPerPlayer;
-                            
                             conn.send({ 
                                 type: 'START_GAME_SETUP', 
                                 playerCount: playerCount,
-                                choices: guestChoices 
+                                choices: pool // Send full pool to everyone
                             });
                         }
                     });
-
+                    
+                    setAvailablePool([]);
                     setView(View.CHAR_SELECT);
                 }
             };
@@ -946,17 +982,11 @@
                 else if (count === 10) { villagers = 27; witches = 2; }
                 else if (count === 11) { villagers = 30; witches = 2; }
                 else if (count === 12) { villagers = 33; witches = 2; }
-                
                 const total = villagers + witches + constable;
                 return { villagers, witches, constable, total, cardsPerPlayer: Math.floor(total / count) };
             };
 
-            const initGame = (chosenCharId) => {
-                if (!isHost && hostConn) {
-                    hostConn.send({ type: 'CHAR_SELECT', charId: chosenCharId });
-                }
-                setTakenCharacters(prev => [...prev, chosenCharId]);
-
+            const hostStartGame = (selections) => {
                 const comp = getDeckComposition(playerCount);
                 let identityDeck = [];
                 for (let i = 0; i < comp.constable; i++) identityDeck.push({ identity: Identity.CONSTABLE, isRevealed: false });
@@ -964,20 +994,39 @@
                 for (let i = 0; i < comp.villagers; i++) identityDeck.push({ identity: Identity.VILLAGER, isRevealed: false });
                 identityDeck = shuffle(identityDeck);
 
-                let availableChars = CHARACTERS.filter(c => c.id !== chosenCharId && !takenCharacters.includes(c.id));
-                availableChars = shuffle(availableChars);
+                // Bot pool - filter from global CHARACTERS using selections
+                let botAvailableChars = CHARACTERS.filter(c => !Object.values(selections).includes(c.id));
+                botAvailableChars = shuffle(botAvailableChars);
                 
                 const newPlayers = [];
-                const humanChar = CHARACTERS.find(c => c.id === chosenCharId);
+                const connected = connectedPlayersRef.current;
 
                 for (let i = 0; i < playerCount; i++) {
-                    const char = i === 0 ? humanChar : availableChars.pop();
+                    let char, name, isHuman, peerId;
+                    
+                    // If slot maps to a connected player
+                    if (i < connected.length) {
+                        const pInfo = connected[i];
+                        const charId = selections[pInfo.peerId];
+                        char = CHARACTERS.find(c => c.id === charId) || botAvailableChars.pop(); // Fallback if undefined
+                        name = pInfo.name;
+                        isHuman = true;
+                        peerId = pInfo.peerId;
+                    } else {
+                        // Bot
+                        char = botAvailableChars.pop();
+                        name = `电脑 ${i}`;
+                        isHuman = false;
+                        peerId = null;
+                    }
+
                     const idCards = identityDeck.splice(0, comp.cardsPerPlayer);
                     
                     newPlayers.push({
                         id: i,
-                        name: i === 0 ? myDisplayName : (i < connectedPlayers.length ? connectedPlayers[i].name : `电脑 ${i}`),
-                        isHuman: i === 0 || (isHost && i < connectedPlayers.length), 
+                        peerId: peerId,
+                        name: name,
+                        isHuman: isHuman,
                         character: char,
                         hand: [],
                         blueCards: [],
@@ -1006,9 +1055,9 @@
                 
                 if (conspiracy) playDeck.push(conspiracy);
                 playDeck = shuffle(playDeck);
-                
                 if (night) playDeck.unshift(night); 
 
+                // --- Local State Update for Host ---
                 setPlayers(newPlayers);
                 setDeck(playDeck);
                 setPhase(Phase.INITIAL_NIGHT);
@@ -1017,11 +1066,42 @@
                 setWitchVotes({});
                 setView(View.GAME);
                 
+                // --- Broadcast Full State to Clients ---
+                broadcastToAll(connectionsRef.current, {
+                    type: 'GAME_START',
+                    players: newPlayers,
+                    deck: playDeck,
+                    phase: Phase.INITIAL_NIGHT
+                });
+
                 const myIdentities = newPlayers[0].identityCards;
                 const isWitch = myIdentities.some(c => c.identity === Identity.WITCH);
                 if (isWitch) showToast('天黑了... 你是女巫! 请放置黑猫。', 5000);
                 else if (myIdentities.some(c => c.identity === Identity.CONSTABLE)) showToast('天黑了... 你是警长! 女巫正在行动。', 5000);
                 else showToast('天黑了... 你是平民。女巫正在行动。', 5000);
+            };
+
+            const handleCharClick = (charId) => {
+                if (takenCharacters.includes(charId)) return;
+                if (hasSelectedChar) return;
+
+                if (isHost) {
+                    const newSelections = { ...playerSelectionsRef.current, [myPeerId]: charId };
+                    setPlayerSelections(newSelections);
+                    setTakenCharacters(Object.values(newSelections));
+                    setHasSelectedChar(true);
+                    broadcastToAll(connectionsRef.current, { type: 'TAKEN_UPDATE', taken: Object.values(newSelections) });
+
+                    // If all humans ready, start
+                    const humansCount = connectedPlayersRef.current.length;
+                    if (Object.keys(newSelections).length === humansCount) {
+                        hostStartGame(newSelections);
+                    }
+                } else {
+                    hostConn.send({ type: 'SELECT_CHAR', charId });
+                    setHasSelectedChar(true);
+                    // Wait screen handles feedback
+                }
             };
 
             // --- Helper for Girl Skill ---
@@ -1843,28 +1923,38 @@
 
             // --- RENDER METHODS ---
             
+            const LandingButton = ({ onClick, icon: Icon, label, color }) => {
+                let bgClass = "bg-[#292524] hover:bg-[#44403c] border-[#57534e]";
+                if (color === 'brown') bgClass = "bg-[#78350f] hover:bg-[#92400e] border-[#451a03]";
+                if (color === 'purple') bgClass = "bg-purple-800 hover:bg-purple-900 border-purple-900";
+
+                return (
+                    <button onClick={onClick} className={`
+                        shrink-0 w-20 h-20 md:w-32 md:h-32 flex flex-col items-center justify-center gap-2 
+                        rounded-xl shadow-lg border transition-all hover:-translate-y-1 active:scale-95
+                        ${bgClass} text-[#e7e5e4]
+                    `}>
+                        <Icon className="w-6 h-6 md:w-10 md:h-10" />
+                        <span className="text-[10px] md:text-sm font-bold font-serif whitespace-nowrap">{label}</span>
+                    </button>
+                )
+            };
+            
             const renderLanding = () => (
                 <div className="min-h-screen flex flex-col items-center justify-center bg-black text-center animate-fade-in p-4 relative overflow-hidden">
                     <div className="absolute inset-0 z-0 opacity-60 bg-[url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2568&auto=format&fit=crop')] bg-cover bg-center grayscale contrast-125"></div>
                     <div className="absolute inset-0 z-0 bg-gradient-to-t from-black via-transparent to-black opacity-90"></div>
                     
-                    <div className="z-10 flex flex-col items-center max-w-3xl">
+                    <div className="z-10 flex flex-col items-center w-full max-w-5xl">
                         <h1 className="text-6xl md:text-8xl font-black text-[#e7e5e4] tracking-wider mb-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] font-serif">女巫镇</h1>
                         <p className="text-xl text-[#a8a29e] italic mb-12 font-serif px-4 tracking-widest">“小镇即将迎来它的第一波客人...”</p>
                         
-                        <div className="flex gap-4">
-                            <button onClick={() => { setIsHost(false); setView(View.JOIN_ROOM); }} className="bg-[#78350f] text-[#e7e5e4] px-6 py-3 rounded font-bold hover:bg-[#92400e] shadow-lg border border-[#451a03] flex items-center gap-2 transition-transform hover:-translate-y-1">
-                                <UserPlus size={18} /> 加入房间
-                            </button>
-                            <button onClick={startSetupHost} className="bg-purple-800 hover:bg-purple-900 text-white px-6 py-3 rounded font-bold shadow-lg border border-purple-900 flex items-center gap-2 transition-transform hover:-translate-y-1">
-                                <Users size={18} /> 好友对战
-                            </button>
-                            <button onClick={() => setView(View.RULES)} className="bg-[#292524] text-[#e7e5e4] px-6 py-3 rounded font-bold hover:bg-[#44403c] shadow-lg border border-[#57534e] flex items-center gap-2 transition-transform hover:-translate-y-1">
-                                <BookOpen size={18} /> 小镇规则
-                            </button>
-                            <button onClick={() => setIsSettingsOpen(true)} className="bg-[#1c1917] text-[#e7e5e4] px-4 py-3 rounded font-bold hover:bg-[#292524] shadow-lg border border-[#57534e] flex items-center gap-2 transition-transform hover:-translate-y-1">
-                                <Settings size={18} /> 游戏设置
-                            </button>
+                        <div className="flex flex-row gap-3 justify-center items-center w-full overflow-x-auto no-scrollbar px-4 py-6">
+                             <LandingButton onClick={() => { setIsHost(false); setView(View.JOIN_ROOM); }} icon={UserPlus} label="加入房间" color="brown" />
+                             <LandingButton onClick={startSetupHost} icon={Users} label="好友对战" color="purple" />
+                             <LandingButton onClick={() => setView(View.RULES)} icon={BookOpen} label="游戏规则" color="dark" />
+                             <LandingButton onClick={() => setIsAnnouncementsOpen(true)} icon={Volume2} label="小镇公告" color="dark" />
+                             <LandingButton onClick={() => setIsSettingsOpen(true)} icon={Settings} label="游戏设置" color="dark" />
                         </div>
                     </div>
                 </div>
@@ -1874,7 +1964,7 @@
                  <div className="min-h-screen flex flex-col items-center justify-center bg-black/80 p-4 animate-fade-in">
                      <div className="max-w-3xl bg-[#1c1917] p-8 rounded shadow-xl border-2 border-[#78350f] relative overflow-y-auto max-h-[80vh]">
                          <button onClick={() => setView(View.LANDING)} className="absolute top-4 right-4 text-[#78350f] hover:text-red-900"><X /></button>
-                         <h2 className="text-3xl font-black mb-6 text-center font-serif text-[#e7e5e4] tracking-widest">小镇规则</h2>
+                         <h2 className="text-3xl font-black mb-6 text-center font-serif text-[#e7e5e4] tracking-widest">游戏规则</h2>
                          
                          <div className="space-y-6 font-serif text-[#a8a29e] text-sm md:text-base leading-relaxed">
                              <p className="text-[#e7e5e4] font-bold text-center italic">
@@ -1901,17 +1991,19 @@
                              <div className="space-y-2 mt-6 pt-6 border-t border-[#44403c]">
                                 <h3 className="text-[#991b1b] font-bold text-lg mb-2">💖 特别致谢</h3>
                                 <p>本游戏目前仍处于开发测试阶段，所有规则与内容可能根据测试反馈持续优化，不代表最终品质。</p>
-                                <p>衷心感谢每一位参与测试的「小镇村民」：<span className="text-[#e7e5e4]">俊坤、李源琦大王、薇薇、煎饼、昊昊、神秘美女丁、洋秘</span></p>
+                                <p>衷心感谢每一位参与测试的「小镇村民」：<span className="text-[#e7e5e4]">俊坤、李源琦大王、薇薇、煎饼、神秘美女丁、洋秘、昊昊</span></p>
                                 <p>同时，特别鸣谢为游戏提供核心资料支持的 <span className="text-[#e7e5e4] font-bold">平凡老师</span>，是你们的陪伴与建议，让女巫镇的冒险之路更加完整～</p>
                              </div>
                              
-                             <p className="text-center text-[#b45309] font-bold mt-4">✨ 后续将持续更新游戏内容，敬请期待！—— 女巫镇镇长 Mr. Junnan</p>
+                             <p className="text-center text-[#b45309] font-bold mt-4">✨ 后续将持续更新游戏内容，敬请期待！——女巫镇镇长 Mr. Junnan</p>
                          </div>
                      </div>
                  </div>
             );
 
-            const renderSetupHost = () => (
+            const renderSetupHost = () => {
+                const comp = getDeckComposition(playerCount);
+                return (
                 <div className="min-h-screen flex items-center justify-center p-4 relative bg-transparent">
                      <div className="w-full max-w-2xl h-[340px] glass-panel rounded-lg overflow-hidden flex flex-row animate-slide-up z-10 shadow-2xl">
                          <div className="w-1/2 p-6 border-r border-[#44403c] flex flex-col justify-between bg-[#1c1917]">
@@ -1947,13 +2039,29 @@
                             </button>
                             <button onClick={() => setView(View.LANDING)} className="text-xs text-[#a8a29e] hover:underline text-center">返回</button>
                          </div>
-                         <div className="w-1/2 p-6 bg-[#0c0a09]/30 flex flex-col justify-center items-center text-center">
-                             <Users className="w-16 h-16 text-[#78350f] opacity-50 mb-4" />
-                             <p className="text-[#a8a29e] text-sm italic">"邀请你的朋友，或者... 敌人。"</p>
+                         <div className="w-1/2 p-6 bg-[#0c0a09]/50 flex flex-col justify-center items-center text-center border-l border-[#292524]">
+                             <h3 className="text-[#b45309] font-bold font-serif text-lg mb-4">本局身份配置</h3>
+                             <div className="space-y-4 w-full px-4">
+                                <div className="flex justify-between items-center border-b border-[#292524] pb-2">
+                                    <span className="text-[#a8a29e] font-serif">女巫身份牌</span>
+                                    <span className="text-purple-400 font-bold text-xl">{comp.witches}</span>
+                                </div>
+                                <div className="flex justify-between items-center border-b border-[#292524] pb-2">
+                                    <span className="text-[#a8a29e] font-serif">警长身份牌</span>
+                                    <span className="text-blue-400 font-bold text-xl">{comp.constable}</span>
+                                </div>
+                                <div className="flex justify-between items-center border-b border-[#292524] pb-2">
+                                    <span className="text-[#a8a29e] font-serif">平民身份牌</span>
+                                    <span className="text-green-400 font-bold text-xl">{comp.villagers}</span>
+                                </div>
+                             </div>
+                             <p className="text-[#57534e] text-xs mt-6 italic font-serif">
+                                 每位玩家将分得 {comp.cardsPerPlayer} 张身份牌
+                             </p>
                          </div>
                      </div>
                 </div>
-            );
+            )};
             
             const renderJoinRoom = () => (
                 <div className="min-h-screen flex items-center justify-center p-4 relative bg-transparent">
@@ -2093,8 +2201,33 @@
             };
 
             const renderCharSelect = () => {
-                const myChoice = takenCharacters.find(id => id === myDisplayName); 
-                
+                if (hasSelectedChar) {
+                    return (
+                        <div className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center p-4 animate-fade-in">
+                             <div className="max-w-md text-center space-y-8">
+                                <div className="relative w-24 h-24 mx-auto">
+                                    <div className="absolute inset-0 border-4 border-[#78350f] rounded-full animate-spin border-t-transparent"></div>
+                                    <div className="absolute inset-2 bg-[#1c1917] rounded-full flex items-center justify-center">
+                                        <Users className="w-10 h-10 text-[#e7e5e4]" />
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h2 className="text-3xl font-serif font-bold text-[#e7e5e4] mb-3">已选择角色</h2>
+                                    <p className="text-[#a8a29e] font-serif text-lg">请等待其他玩家...</p>
+                                </div>
+
+                                <div className="inline-flex items-center gap-3 px-6 py-3 bg-[#292524] rounded border border-[#44403c]">
+                                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                    <span className="text-[#e7e5e4] font-bold font-serif">
+                                        {takenCharacters.length} / {connectedPlayers.length} 玩家已就绪
+                                    </span>
+                                </div>
+                             </div>
+                        </div>
+                    );
+                }
+
                 return (
                 <div className="min-h-screen flex items-center justify-center p-4 relative bg-transparent">
                     <div className="w-full max-w-5xl flex flex-col items-center z-10">
@@ -2103,14 +2236,19 @@
                         </h2>
                         
                         <div className="flex flex-row gap-6 items-center justify-center flex-wrap">
-                            {charChoices.map((char, idx) => (
+                            {charChoices.map((char, idx) => {
+                                const isTaken = takenCharacters.includes(char.id);
+                                return (
                                 <div 
                                     key={char.id}
-                                    onClick={() => initGame(char.id)}
+                                    onClick={() => !isTaken && !hasSelectedChar && handleCharClick(char.id)}
                                     className={`
-                                        w-44 h-60 glass-panel rounded-lg border-2 border-[#78350f] hover:border-[#b45309]
-                                        cursor-pointer transition-all duration-300 transform hover:-translate-y-2 hover:shadow-xl
+                                        w-44 h-60 glass-panel rounded-lg border-2 transition-all duration-300 transform
                                         flex flex-col items-center p-4 animate-slide-up bg-[#1c1917]
+                                        ${isTaken 
+                                            ? 'opacity-50 grayscale cursor-not-allowed border-[#44403c]' 
+                                            : 'cursor-pointer hover:-translate-y-2 hover:shadow-xl border-[#78350f] hover:border-[#b45309]'
+                                        }
                                     `}
                                     style={{animationDelay: `${idx * 0.1}s`}}
                                 >
@@ -2120,14 +2258,19 @@
                                             alt={char.name}
                                             className="w-full h-full object-cover opacity-80"
                                         />
+                                        {isTaken && (
+                                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold text-xs">
+                                                已选
+                                            </div>
+                                        )}
                                     </div>
                                     <h3 className="text-lg font-bold text-[#e7e5e4] mb-2 font-serif">{char.name}</h3>
                                     <p className="text-center text-[10px] text-[#a8a29e] leading-tight font-serif px-1 italic flex-1">{char.desc}</p>
                                     <div className="mt-auto pt-2 text-[#78350f] text-[10px] font-bold tracking-widest uppercase border-t border-[#44403c] w-full text-center">
-                                        {charChoices.length > 1 ? "点击选择" : "点击开始"}
+                                        {isTaken ? "已被选择" : "点击选择"}
                                     </div>
                                 </div>
-                            ))}
+                            )})}
                         </div>
                     </div>
                 </div>
@@ -2148,6 +2291,14 @@
                                 {systemMessage}
                             </div>
                         </div>
+                        
+                        {/* In-game settings button */}
+                        <button 
+                            onClick={() => setIsSettingsOpen(true)}
+                            className="absolute top-4 right-4 z-50 p-2 bg-[#1c1917]/80 rounded-full border border-[#78350f] text-[#e7e5e4] hover:bg-[#292524] backdrop-blur transition-colors"
+                        >
+                            <Settings size={20} />
+                        </button>
 
                         {/* Timer Bar */}
                         {phase === Phase.DAY_TURN && (
@@ -2273,114 +2424,58 @@
                                         <button onClick={() => resolveDawn(true)} className="px-3 py-1 bg-[#1e3a8a] border border-[#1e40af] text-white rounded text-xs hover:bg-[#1e40af]">自首</button>
                                         
                                         {myRole.id === 'official' && !me.officialSkillUsed && (
-                                            <button onClick={() => resolveDawn(true, true)} className="px-3 py-1 bg-[#78350f] border border-[#451a03] text-white rounded text-xs hover:bg-[#92400e]">
-                                                自首(不翻牌)
-                                            </button>
+                                            <button onClick={() => resolveDawn(true, true)} className="px-3 py-1 bg-[#581c87] border border-[#6b21a8] text-white rounded text-xs hover:bg-[#6b21a8]">特权自首</button>
                                         )}
                                         
-                                        <button onClick={() => resolveDawn(false)} className="px-3 py-1 bg-[#b91c1c] border border-[#991b1b] text-white rounded text-xs hover:bg-[#991b1b]">不想自首</button>
+                                        <button onClick={() => resolveDawn(false)} className="px-3 py-1 bg-[#7f1d1d] border border-[#991b1b] text-white rounded text-xs hover:bg-[#991b1b]">沉默</button>
                                     </div>
                                 </div>
                             )}
 
-                            {/* My Hand Cards */}
-                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-end justify-center gap-1 z-50 w-full max-w-2xl pointer-events-none">
-                                {me && me.hand.map((card, index) => (
-                                    <div key={card.id} className="pointer-events-auto transform transition-transform hover:-translate-y-4" style={{zIndex: index}}>
-                                        <Card 
-                                            card={card} 
-                                            isSelected={selectedCardIds.includes(card.id)}
-                                            onClick={(c) => handlePlayCard(c)}
-                                            disabled={!isMyTurn || (me.hand.some(h => h.type === CardType.BLACK) && card.type !== CardType.BLACK)}
-                                        />
+                            {/* Hand Cards */}
+                            {me && !me.isDead && (
+                                <div className="absolute bottom-4 right-4 left-20 md:left-40 flex justify-end md:justify-center pointer-events-auto pb-safe overflow-x-auto no-scrollbar pl-20">
+                                    <div className="flex gap-[-10px] md:gap-2 px-4 py-2 min-w-max">
+                                        {me.hand.map(card => (
+                                            <Card 
+                                                key={card.id} 
+                                                card={card} 
+                                                isSelected={selectedCardIds.includes(card.id)}
+                                                onClick={() => isMyTurn && phase === Phase.DAY_TURN && handlePlayCard(card)}
+                                                disabled={!isMyTurn || phase !== Phase.DAY_TURN}
+                                            />
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
-                            
-                            {/* Circular Action Buttons - Right Side */}
-                            <div className="absolute bottom-6 right-4 md:right-8 flex flex-row gap-4 pointer-events-auto items-end">
-                                    {isMyTurn && phase === Phase.DAY_TURN && (
-                                        me.hand.some(c => c.type === CardType.BLACK) ? (
-                                            <button onClick={() => handlePlayCard(me.hand.find(c => c.type === CardType.BLACK))} 
-                                                className="w-20 h-20 rounded-full bg-[#581c87] text-white flex flex-col items-center justify-center gap-1 animate-pulse shadow-xl border-2 border-[#3b0764] hover:scale-105 transition-transform">
-                                                <Skull className="w-8 h-8" />
-                                                <span className="text-[10px] font-bold">打出黑卡</span>
-                                            </button>
-                                        ) : (
-                                            <>
-                                                {girlCanJudge && !hasPlayedCard && (
-                                                    <button 
-                                                        onClick={handleGirlTrialStart}
-                                                        className="w-16 h-16 rounded-full bg-[#92400e] hover:bg-[#b45309] text-[#fef3c7] flex flex-col items-center justify-center shadow-xl border-2 border-[#78350f] hover:scale-105 transition-all animate-bounce"
-                                                    >
-                                                        <Scale className="w-6 h-6 mb-1" />
-                                                        <span className="text-[10px] font-bold">审判</span>
-                                                    </button>
-                                                )}
-
-                                                <button 
-                                                    disabled={hasPlayedCard}
-                                                    onClick={() => handleDrawCards(2, false, true)}
-                                                    className="w-16 h-16 rounded-full bg-[#292524] hover:bg-[#44403c] text-[#e6e0d4] flex flex-col items-center justify-center shadow-xl disabled:opacity-60 transition-all border-2 border-[#57534e] hover:scale-105"
-                                                >
-                                                    <Hand className="w-6 h-6 mb-1" />
-                                                    <span className="text-[10px]">摸牌</span>
-                                                </button>
-                                                
-                                                <button 
-                                                    disabled={!hasPlayedCard && me.hand.length > 0} 
-                                                    onClick={() => endTurn(players)}
-                                                    className="w-20 h-20 rounded-full bg-[#991b1b] hover:bg-[#b91c1c] text-[#f5f5f4] flex flex-col items-center justify-center shadow-xl disabled:opacity-60 transition-all border-2 border-[#7f1d1d] hover:scale-105"
-                                                >
-                                                    <X className="w-8 h-8 mb-1" />
-                                                    <span className="text-xs font-bold">结束回合</span>
-                                                </button>
-                                            </>
-                                        )
-                                    )}
-                            </div>
-                        </div>
-                        
-                        {(phase === Phase.NIGHT_WITCH && !amWitch) || (phase === Phase.NIGHT_CONSTABLE && !amConstable) || (phase === Phase.INITIAL_NIGHT && !amWitch) ? (
-                            <div className="fixed inset-0 bg-[#000000]/95 z-[200] flex items-center justify-center">
-                                <div className="text-center animate-pulse">
-                                    <Moon className="w-20 h-20 text-[#a855f7] mx-auto mb-4 opacity-80"/>
-                                    <h2 className="text-2xl font-serif text-[#e6e0d4] tracking-widest">
-                                        {phase === Phase.INITIAL_NIGHT ? '女巫请睁眼放黑猫...' : '天黑请闭眼...'}
-                                    </h2>
                                 </div>
-                            </div>
-                        ) : null}
-
+                            )}
+                            
+                            {girlCanJudge && isMyTurn && phase === Phase.DAY_TURN && !hasPlayedCard && (
+                                <div className="absolute bottom-32 right-8 pointer-events-auto animate-pulse">
+                                    <button onClick={handleGirlTrialStart} className="bg-[#b91c1c] text-white px-4 py-2 rounded-lg font-bold shadow-lg border border-red-900 flex items-center gap-2">
+                                        <Gavel size={16} /> 少女审判
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 );
             };
 
             return (
                 <>
-                    {/* BGM Audio Element */}
-                    <audio ref={audioRef} src="./assets/bgm.mp3" loop autoPlay />
-
-                    {isSettingsOpen && (
-                        <SettingsModal 
-                            volume={bgmVolume} 
-                            onVolumeChange={setBgmVolume}
-                            onClose={() => setIsSettingsOpen(false)}
-                        />
-                    )}
-
-                    {(() => {
-                        switch(view) {
-                            case View.LANDING: return renderLanding();
-                            case View.RULES: return renderRules();
-                            case View.SETUP_HOST: return renderSetupHost();
-                            case View.JOIN_ROOM: return renderJoinRoom();
-                            case View.WAITING_ROOM: return renderWaitingRoom();
-                            case View.CHAR_SELECT: return renderCharSelect();
-                            case View.GAME: return renderGame();
-                            default: return renderLanding();
-                        }
-                    })()}
+                    {view === View.LANDING && renderLanding()}
+                    {view === View.RULES && renderRules()}
+                    {view === View.SETUP_HOST && renderSetupHost()}
+                    {view === View.JOIN_ROOM && renderJoinRoom()}
+                    {view === View.WAITING_ROOM && renderWaitingRoom()}
+                    {view === View.CHAR_SELECT && renderCharSelect()}
+                    {view === View.GAME && renderGame()}
+                    {isSettingsOpen && <SettingsModal onClose={() => setIsSettingsOpen(false)} volume={bgmVolume} onVolumeChange={setBgmVolume} />}
+                    {isAnnouncementsOpen && <AnnouncementsModal onClose={() => setIsAnnouncementsOpen(false)} />}
+                    
+                    <audio ref={audioRef} loop>
+                        <source src="https://cdn.pixabay.com/download/audio/2022/10/28/audio_b91b666196.mp3" type="audio/mpeg" />
+                    </audio>
                 </>
             );
         };
