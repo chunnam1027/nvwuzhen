@@ -93,14 +93,14 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef } from 'react';
         import { createRoot } from 'react-dom/client';
-        import { Shield, Skull, Zap, Eye, Users, Moon, Gavel, Search, Lock, Heart, Home, Cat, RotateCcw, BookOpen, Play, Hand, X, Layers, Scale, Copy, Check, UserPlus, Crown, Volume2, Settings, Music, Link, Loader2, Info, Server } from 'lucide-react';
+        import { Shield, Skull, Zap, Eye, Users, Moon, Gavel, Search, Lock, Heart, Home, Cat, RotateCcw, BookOpen, Play, Hand, X, Layers, Scale, Copy, Check, UserPlus, Crown, Volume2, Settings, Music, Link, Loader2, Info, Server, Wifi } from 'lucide-react';
 
         // --- Constants & Types ---
         
         // --- 阿里云私有服务器配置 (ALIBABA CLOUD CONFIG) ---
         // 已配置为你的 Windows Server 2022 实例
         const ServerConfig = {
-            usePrivateServer: true, // 已开启私有服务器模式
+            usePrivateServer: true, // 默认开启
             host: "118.31.222.7",   // 你的阿里云公网IP
             port: 9000,
             path: "/salem-game"
@@ -314,7 +314,7 @@
             );
         };
 
-        const SettingsModal = ({ onClose, volume, onVolumeChange }) => {
+        const SettingsModal = ({ onClose, volume, onVolumeChange, usePrivateNet, onTogglePrivateNet }) => {
             return (
                 <div className="fixed inset-0 z-[300] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
                     <div className="bg-[#1c1917] p-6 rounded-lg shadow-2xl max-w-md w-full border-2 border-[#78350f] relative">
@@ -344,9 +344,24 @@
                                 />
                             </div>
                             
-                            <div className="bg-[#292524] p-4 rounded border border-[#44403c] flex items-center gap-2 text-[#a8a29e] text-xs">
-                                <Server size={14} className={ServerConfig.usePrivateServer ? "text-green-500" : "text-yellow-500"} />
-                                <span>当前网络: {ServerConfig.usePrivateServer ? "阿里云专线 (高速)" : "公共节点 (较慢)"}</span>
+                            <div className="bg-[#292524] p-4 rounded border border-[#44403c]">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2 text-[#e7e5e4] font-bold text-sm">
+                                        <Server size={18} className={usePrivateNet ? "text-green-500" : "text-yellow-500"} />
+                                        网络模式
+                                    </div>
+                                    <button 
+                                        onClick={onTogglePrivateNet}
+                                        className={`px-3 py-1 rounded text-xs font-bold border ${usePrivateNet ? 'bg-green-900/30 text-green-400 border-green-800' : 'bg-yellow-900/30 text-yellow-400 border-yellow-800'}`}
+                                    >
+                                        {usePrivateNet ? "阿里云专线" : "公共节点"}
+                                    </button>
+                                </div>
+                                <p className="text-[#a8a29e] text-xs leading-relaxed">
+                                    {usePrivateNet 
+                                        ? "当前配置：118.31.222.7 (Windows Server)。如显示“Failed to fetch”，请检查服务器端程序是否运行。" 
+                                        : "当前配置：公共测试节点。速度较慢，仅供临时使用。"}
+                                </p>
                             </div>
                         </div>
 
@@ -371,10 +386,11 @@
                     </h3>
                     <div className="space-y-4 font-serif text-[#a8a29e]">
                         <div className="bg-[#292524] p-4 rounded border border-[#44403c]">
-                            <p className="mb-2 flex items-center gap-2"><strong className="text-[#b45309]">1. 私有服务器已上线！</strong></p>
-                            <p className="text-sm">镇长已成功部署 <span className="text-amber-500 font-bold">阿里云服务器 (118.31.222.7)</span>！</p>
-                            <p className="text-sm mt-2">
-                                只要服务器端的程序正常运行，现在创建房间和加入游戏将享受极速体验，彻底告别「连接超时」和「5G无法连接」的问题。
+                            <p className="mb-2 flex items-center gap-2"><strong className="text-[#b45309]">1. 服务器配置向导</strong></p>
+                            <p className="text-sm">镇长正在将游戏迁移至 <span className="text-amber-500 font-bold">阿里云 Windows Server (118.31.222.7)</span>！</p>
+                            <p className="text-sm mt-2 text-[#e7e5e4]">
+                                如果你看到“Connection Error”或“Failed to fetch”，说明你的服务器还没启动。
+                                <strong>请点击主页右下角的设置图标，暂时切换为「公共节点」</strong>，直到你在服务器上运行了 server.js。
                             </p>
                         </div>
                         <div className="bg-[#292524] p-4 rounded border border-[#44403c]">
@@ -613,6 +629,7 @@
             const [myDisplayName, setMyDisplayName] = useState(""); // Player Name
 
             // Network State
+            const [usePrivateNet, setUsePrivateNet] = useState(ServerConfig.usePrivateServer);
             const [peer, setPeer] = useState(null);
             const [roomId, setRoomId] = useState(""); // Host's Peer ID
             const [myPeerId, setMyPeerId] = useState("");
@@ -738,7 +755,7 @@
 
                 let newPeer;
 
-                if (ServerConfig.usePrivateServer && ServerConfig.host !== "YOUR_ALIBABA_IP_HERE") {
+                if (usePrivateNet && ServerConfig.host) {
                     // --- 私有阿里云服务器模式 ---
                     console.log("Connecting to Private Alibaba Cloud Server:", ServerConfig.host);
                     newPeer = new window.Peer(null, {
@@ -807,14 +824,23 @@
                     let msg = "网络错误";
                     if (err.type === 'peer-unavailable') msg = "找不到该房间或房主已离线";
                     else if (err.type === 'unavailable-id') msg = "ID已被占用，请刷新重试";
-                    else if (err.type === 'network' || err.type === 'server-error') {
-                         msg = ServerConfig.usePrivateServer ? "连接私有服务器失败 (请检查9000端口)" : "网络连接失败，请尝试切换WiFi/热点";
+                    else if (err.type === 'network' || err.type === 'server-error' || err.type === 'socket-error' || err.message.includes("fetch")) {
+                         msg = usePrivateNet ? "连接服务器失败! 请检查服务器是否运行，或在设置中切换回公共节点。" : "网络连接失败，请尝试切换WiFi/热点";
                     }
-                    showToast(`${msg} (${err.type})`);
+                    showToast(`${msg} (${err.type || 'Error'})`, 6000);
                 });
 
                 setPeer(newPeer);
                 return newPeer;
+            };
+
+            const togglePrivateNet = () => {
+                if (peer) {
+                    peer.destroy();
+                    setPeer(null);
+                }
+                setUsePrivateNet(!usePrivateNet);
+                showToast(`已切换至 ${!usePrivateNet ? "私有服务器" : "公共节点"} 模式`);
             };
 
             const hostRoom = () => {
@@ -855,7 +881,7 @@
                 const connectionTimeout = setTimeout(() => {
                     if (isJoining) {
                         setIsJoining(false);
-                        const tip = ServerConfig.usePrivateServer ? "请确认房主已开启服务器" : "请检查房间号或网络";
+                        const tip = usePrivateNet ? "请确认房主已开启服务器" : "请检查房间号或网络";
                         showToast(`连接超时。${tip}`, 5000);
                     }
                 }, 30000); 
@@ -2536,7 +2562,7 @@
                     {view === View.WAITING_ROOM && renderWaitingRoom()}
                     {view === View.CHAR_SELECT && renderCharSelect()}
                     {view === View.GAME && renderGame()}
-                    {isSettingsOpen && <SettingsModal onClose={() => setIsSettingsOpen(false)} volume={bgmVolume} onVolumeChange={setBgmVolume} />}
+                    {isSettingsOpen && <SettingsModal onClose={() => setIsSettingsOpen(false)} volume={bgmVolume} onVolumeChange={setBgmVolume} usePrivateNet={usePrivateNet} onTogglePrivateNet={togglePrivateNet} />}
                     {isAnnouncementsOpen && <AnnouncementsModal onClose={() => setIsAnnouncementsOpen(false)} />}
                     
                     <audio ref={audioRef} loop>
