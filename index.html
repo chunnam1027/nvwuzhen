@@ -68,6 +68,8 @@
             background: #44403c;
             border-radius: 5px;
             outline: none;
+            appearance: none;
+            -webkit-appearance: none;
         }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -92,7 +94,7 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef } from 'react';
         import { createRoot } from 'react-dom/client';
-        import { Shield, Skull, Zap, Eye, Users, Moon, Gavel, Search, Lock, Heart, Home, Cat, RotateCcw, BookOpen, Play, Hand, X, Layers, Scale, Copy, Check, UserPlus, Crown } from 'lucide-react';
+        import { Shield, Skull, Zap, Eye, Users, Moon, Gavel, Search, Lock, Heart, Home, Cat, RotateCcw, BookOpen, Play, Hand, X, Layers, Scale, Copy, Check, UserPlus, Crown, Volume2, Settings, Music } from 'lucide-react';
 
         // --- Constants & Types ---
 
@@ -304,6 +306,47 @@
             );
         };
 
+        const SettingsModal = ({ onClose, volume, onVolumeChange }) => {
+            return (
+                <div className="fixed inset-0 z-[300] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-[#1c1917] p-6 rounded-lg shadow-2xl max-w-md w-full border-2 border-[#78350f] relative">
+                        <button onClick={onClose} className="absolute top-2 right-2 text-[#a8a29e] hover:text-white p-1">
+                            <X />
+                        </button>
+                        <h3 className="text-xl font-serif font-bold text-center mb-6 text-[#e7e5e4] flex items-center justify-center gap-2">
+                            <Settings size={24} /> 游戏设置
+                        </h3>
+                        
+                        <div className="space-y-6">
+                            <div className="bg-[#292524] p-4 rounded border border-[#44403c]">
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="text-[#e7e5e4] font-bold flex items-center gap-2">
+                                        <Music size={18} className="text-[#b45309]" /> 背景音乐音量
+                                    </label>
+                                    <span className="text-[#a8a29e] text-sm">{Math.round(volume * 100)}%</span>
+                                </div>
+                                <input 
+                                    type="range" 
+                                    min="0" 
+                                    max="1" 
+                                    step="0.01" 
+                                    value={volume}
+                                    onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
+                                    className="w-full h-2 bg-[#44403c] rounded-lg appearance-none cursor-pointer accent-[#78350f]"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mt-6 text-center">
+                            <button onClick={onClose} className="bg-[#78350f] text-[#e7e5e4] px-6 py-2 rounded font-bold hover:bg-[#92400e] transition-colors border border-[#451a03]">
+                                确认
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
         const Card = ({ card, isSelected, onClick, disabled, small }) => {
             const getCardStyle = (type) => {
                 switch (type) {
@@ -368,7 +411,9 @@
 
             const effectiveRole = getEffectiveRole(player, allPlayers);
 
-            const sizeClass = "w-20 md:w-24";
+            // Reduced size slightly to fit 4 in a row on smaller screens
+            const sizeClass = "w-16 md:w-20";
+            
             const isRevealTarget = revealMode && isTargetable; 
             const isGirlTarget = girlTrialMode && !player.isDead && player.id !== myPlayerId;
 
@@ -390,7 +435,7 @@
                     `}
                 >
                     {/* Role Title Header */}
-                    <div className={`w-full bg-[#292524] text-center py-0.5 text-[#a8a29e] font-bold truncate px-1 border-b border-[#44403c] text-[10px] font-serif tracking-wide`}>
+                    <div className={`w-full bg-[#292524] text-center py-0.5 text-[#a8a29e] font-bold truncate px-1 border-b border-[#44403c] text-[9px] md:text-[10px] font-serif tracking-wide`}>
                         {effectiveRole.name}
                     </div>
 
@@ -429,42 +474,42 @@
 
                         <div className="absolute top-0.5 right-0.5 flex flex-col gap-0.5 items-end">
                             {hasBlackCat && (
-                                <div className="w-5 h-5 rounded-full bg-[#2e1065] border border-purple-400 flex items-center justify-center shadow-[0_0_15px_#a855f7] z-20">
-                                    <Cat className="w-3 h-3 text-purple-200" />
+                                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-[#2e1065] border border-purple-400 flex items-center justify-center shadow-[0_0_15px_#a855f7] z-20">
+                                    <Cat className="w-2.5 h-2.5 md:w-3 md:h-3 text-purple-200" />
                                 </div>
                             )}
                             {isProtected && (
-                                <div className="w-5 h-5 rounded-full bg-[#1e3a8a] border border-blue-300 flex items-center justify-center shadow-md z-20">
-                                    <Shield className="w-3 h-3 text-blue-200" />
+                                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-[#1e3a8a] border border-blue-300 flex items-center justify-center shadow-md z-20">
+                                    <Shield className="w-2.5 h-2.5 md:w-3 md:h-3 text-blue-200" />
                                 </div>
                             )}
                             {hasMatchmaker && (
-                                <div className="w-5 h-5 rounded-full bg-[#831843] border border-pink-300 flex items-center justify-center shadow-md">
-                                    <Heart className="w-3 h-3 text-pink-200" />
+                                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-[#831843] border border-pink-300 flex items-center justify-center shadow-md">
+                                    <Heart className="w-2.5 h-2.5 md:w-3 md:h-3 text-pink-200" />
                                 </div>
                             )}
                             {hasAsylum && (
-                                <div className="w-5 h-5 rounded-full bg-[#14532d] border border-green-300 flex items-center justify-center shadow-md">
-                                    <Home className="w-3 h-3 text-green-200" />
+                                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-[#14532d] border border-green-300 flex items-center justify-center shadow-md">
+                                    <Home className="w-2.5 h-2.5 md:w-3 md:h-3 text-green-200" />
                                 </div>
                             )}
                             {hasAlibi && (
-                                <div className="w-5 h-5 rounded-full bg-[#134e4a] border border-teal-300 flex items-center justify-center shadow-md">
-                                    <Users className="w-3 h-3 text-teal-200" />
+                                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-[#134e4a] border border-teal-300 flex items-center justify-center shadow-md">
+                                    <Users className="w-2.5 h-2.5 md:w-3 md:h-3 text-teal-200" />
                                 </div>
                             )}
                         </div>
                     </div>
 
                     {/* Accusation Bar */}
-                    <div className="w-full min-h-[16px] flex flex-wrap justify-center items-center bg-[#292524] border-t border-b border-[#44403c] px-0.5 py-0.5">
+                    <div className="w-full min-h-[14px] flex flex-wrap justify-center items-center bg-[#292524] border-t border-b border-[#44403c] px-0.5 py-0.5">
                         {Array.from({ length: player.accusations }).map((_, i) => (
-                            <span key={i} className="text-[10px] text-[#dc2626] font-bold leading-none mx-[1px]">✕</span>
+                            <span key={i} className="text-[8px] text-[#dc2626] font-bold leading-none mx-[1px]">✕</span>
                         ))}
                     </div>
 
                     {/* Identity Cards Row */}
-                    <div className="w-full flex justify-center gap-0.5 p-1 bg-[#1c1917] border-t border-[#44403c] h-8 items-center">
+                    <div className="w-full flex justify-center gap-0.5 p-0.5 bg-[#1c1917] border-t border-[#44403c] h-6 items-center">
                         {player.identityCards.map((card, idx) => {
                             const identityLabel = card.identity === Identity.WITCH ? '巫' : card.identity === Identity.CONSTABLE ? '警' : '民';
                             
@@ -497,7 +542,7 @@
                                 <div 
                                     key={idx}
                                     className={`
-                                        w-4 h-6 rounded-[2px] border text-[10px] flex items-center justify-center leading-none font-bold font-serif
+                                        w-3 h-5 rounded-[2px] border text-[8px] flex items-center justify-center leading-none font-bold font-serif
                                         ${styleClass}
                                     `}
                                 >
@@ -546,6 +591,8 @@
             const [trialTargetId, setTrialTargetId] = useState(null); 
             const [identitySelectionTargetId, setIdentitySelectionTargetId] = useState(null);
             const [girlTrialMode, setGirlTrialMode] = useState(false);
+            const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+            const [bgmVolume, setBgmVolume] = useState(0.5);
             
             // Night/Voting State
             const [witchVotes, setWitchVotes] = useState({});
@@ -559,6 +606,7 @@
 
             // Refs
             const toastTimeoutRef = useRef(null);
+            const audioRef = useRef(null);
 
             // --- Toast Logic ---
             const showToast = (msg, duration = 4000) => {
@@ -566,6 +614,22 @@
                 setSystemMessage(msg);
                 toastTimeoutRef.current = setTimeout(() => setSystemMessage(null), duration);
             };
+
+            // --- Audio Logic ---
+            useEffect(() => {
+                if(audioRef.current) {
+                    audioRef.current.volume = bgmVolume;
+                    if (bgmVolume > 0 && audioRef.current.paused) {
+                         // Attempt to play automatically, though browsers may block this without interaction
+                         const playPromise = audioRef.current.play();
+                         if (playPromise !== undefined) {
+                             playPromise.catch(error => {
+                                 console.log("Autoplay prevented by browser policy. Interaction needed.");
+                             });
+                         }
+                    }
+                }
+            }, [bgmVolume]);
 
             // --- Networking Logic ---
 
@@ -588,13 +652,22 @@
                 if (!myDisplayName.trim()) { showToast("请输入你的名字"); return; }
                 const p = initPeer();
                 setIsHost(true);
-                
-                p.on('open', (id) => {
+                setConnections([]); // Clear previous connections
+
+                const onOpen = (id) => {
                     setRoomId(id);
                     setConnectedPlayers([{ peerId: id, name: myDisplayName, isReady: true, isHost: true }]);
                     setView(View.WAITING_ROOM);
-                });
+                };
 
+                if (p.open) {
+                    onOpen(p.id);
+                } else {
+                    p.on('open', onOpen);
+                }
+                
+                // Ensure we don't have duplicate listeners if peer is reused
+                p.off('connection');
                 p.on('connection', (conn) => {
                     conn.on('data', (data) => handleHostData(data, conn));
                     conn.on('open', () => {
@@ -610,7 +683,7 @@
                 const p = initPeer();
                 setIsHost(false);
                 
-                p.on('open', (id) => {
+                const connect = () => {
                     const conn = p.connect(roomId);
                     conn.on('open', () => {
                         setHostConn(conn);
@@ -620,7 +693,13 @@
                     conn.on('data', (data) => handleGuestData(data));
                     conn.on('close', () => { showToast("与房主断开连接"); setView(View.LANDING); });
                     conn.on('error', () => { showToast("连接失败"); });
-                });
+                };
+
+                if (p.open) {
+                    connect();
+                } else {
+                    p.on('open', connect);
+                }
             };
 
             // HOST: Handle incoming data
@@ -684,11 +763,6 @@
             // --- Initialization Logic ---
             const startSetupHost = () => {
                 setView(View.SETUP_HOST);
-            };
-
-            const enterWaitingRoom = () => {
-                if (isHost) hostRoom();
-                else joinRoom();
             };
 
             const launchGameSetup = () => {
@@ -1630,7 +1704,7 @@
                         <p className="text-xl text-[#a8a29e] italic mb-12 font-serif px-4 tracking-widest">“小镇即将迎来它的第一波客人...”</p>
                         
                         <div className="flex gap-4">
-                            <button onClick={() => setView(View.JOIN_ROOM)} className="bg-[#78350f] text-[#e7e5e4] px-6 py-3 rounded font-bold hover:bg-[#92400e] shadow-lg border border-[#451a03] flex items-center gap-2 transition-transform hover:-translate-y-1">
+                            <button onClick={() => { setIsHost(false); setView(View.JOIN_ROOM); }} className="bg-[#78350f] text-[#e7e5e4] px-6 py-3 rounded font-bold hover:bg-[#92400e] shadow-lg border border-[#451a03] flex items-center gap-2 transition-transform hover:-translate-y-1">
                                 <UserPlus size={18} /> 加入房间
                             </button>
                             <button onClick={startSetupHost} className="bg-purple-800 hover:bg-purple-900 text-white px-6 py-3 rounded font-bold shadow-lg border border-purple-900 flex items-center gap-2 transition-transform hover:-translate-y-1">
@@ -1638,6 +1712,9 @@
                             </button>
                             <button onClick={() => setView(View.RULES)} className="bg-[#292524] text-[#e7e5e4] px-6 py-3 rounded font-bold hover:bg-[#44403c] shadow-lg border border-[#57534e] flex items-center gap-2 transition-transform hover:-translate-y-1">
                                 <BookOpen size={18} /> 小镇规则
+                            </button>
+                            <button onClick={() => setIsSettingsOpen(true)} className="bg-[#1c1917] text-[#e7e5e4] px-4 py-3 rounded font-bold hover:bg-[#292524] shadow-lg border border-[#57534e] flex items-center gap-2 transition-transform hover:-translate-y-1">
+                                <Settings size={18} /> 游戏设置
                             </button>
                         </div>
                     </div>
@@ -1714,7 +1791,7 @@
                                 </div>
                             </div>
                             <button 
-                               onClick={enterWaitingRoom}
+                               onClick={hostRoom}
                                className="w-full py-3 bg-[#78350f] hover:bg-[#92400e] text-[#f5f5dc] font-bold text-base rounded shadow transition-colors border border-[#451a03] font-serif mt-2"
                             >
                                 创建房间
@@ -1756,7 +1833,7 @@
                             </div>
                         </div>
                         <button 
-                           onClick={enterWaitingRoom}
+                           onClick={joinRoom}
                            className="w-full py-3 bg-[#1e3a8a] hover:bg-[#1e40af] text-[#f5f5dc] font-bold text-base rounded shadow transition-colors border border-[#172554] font-serif"
                         >
                             加入游戏
@@ -1916,10 +1993,10 @@
                             </div>
                         </div>
 
-                        {/* Game Area */}
+                        {/* Game Area - 4 Column Grid for 12 Players (3 rows) */}
                         <div className="flex-1 relative pointer-events-auto flex flex-col">
-                            <div className="flex-1 flex items-center justify-center pb-40">
-                                <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 px-2 max-w-6xl">
+                            <div className="flex-1 flex items-center justify-center pb-32 overflow-y-auto">
+                                <div className="grid grid-cols-4 gap-x-4 gap-y-2 md:gap-x-8 md:gap-y-4 max-w-5xl mx-auto p-4">
                                     {players.map(p => {
                                         if (p.id === myPlayerId) return null;
                                         
@@ -2105,16 +2182,33 @@
                 );
             };
 
-            switch(view) {
-                case View.LANDING: return renderLanding();
-                case View.RULES: return renderRules();
-                case View.SETUP_HOST: return renderSetupHost();
-                case View.JOIN_ROOM: return renderJoinRoom();
-                case View.WAITING_ROOM: return renderWaitingRoom();
-                case View.CHAR_SELECT: return renderCharSelect();
-                case View.GAME: return renderGame();
-                default: return renderLanding();
-            }
+            return (
+                <>
+                    {/* BGM Audio Element */}
+                    <audio ref={audioRef} src="./assets/bgm.mp3" loop />
+
+                    {isSettingsOpen && (
+                        <SettingsModal 
+                            volume={bgmVolume} 
+                            onVolumeChange={setBgmVolume}
+                            onClose={() => setIsSettingsOpen(false)}
+                        />
+                    )}
+
+                    {(() => {
+                        switch(view) {
+                            case View.LANDING: return renderLanding();
+                            case View.RULES: return renderRules();
+                            case View.SETUP_HOST: return renderSetupHost();
+                            case View.JOIN_ROOM: return renderJoinRoom();
+                            case View.WAITING_ROOM: return renderWaitingRoom();
+                            case View.CHAR_SELECT: return renderCharSelect();
+                            case View.GAME: return renderGame();
+                            default: return renderLanding();
+                        }
+                    })()}
+                </>
+            );
         };
 
         const root = createRoot(document.getElementById('root'));
@@ -2123,4 +2217,3 @@
 <script type="module" src="/index.tsx"></script>
 </body>
 </html>
-    
