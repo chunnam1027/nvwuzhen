@@ -359,6 +359,7 @@
                         <div className="bg-[#292524] p-4 rounded border border-[#44403c]">
                             <p className="mb-2"><strong className="text-[#b45309]">1. 联机说明：</strong></p>
                             <p className="text-sm">游戏目前联机对战还有严重BUG，如果大家想和朋友对战可以开热点或者在同一wifi下可以进入房间进行对战。</p>
+                            <p className="text-sm mt-2 text-green-400 font-bold">✨ 更新日志：已针对5G/移动网络进行连接优化 (新增国内STUN节点)，请尝试重新连接。</p>
                         </div>
                         <div className="bg-[#292524] p-4 rounded border border-[#44403c]">
                             <p className="mb-2"><strong className="text-[#b45309]">2. 开发说明：</strong></p>
@@ -735,12 +736,13 @@
                     }
                 ];
 
+                // ADDED: Chinese domestic STUN servers to fix 5G/Mobile connection issues
+                // Google STUN is often blocked or slow in CN, causing failures on 5G.
                 const DEFAULT_ICE_SERVERS = [
+                    { urls: 'stun:stun.qq.com:3478' },
+                    { urls: 'stun:stun.miwifi.com:3478' },
                     { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' },
-                    { urls: 'stun:stun2.l.google.com:19302' },
-                    { urls: 'stun:stun3.l.google.com:19302' },
-                    { urls: 'stun:stun4.l.google.com:19302' }
+                    { urls: 'stun:stun1.l.google.com:19302' }
                 ];
 
                 const iceServersToUse = [...METERED_TURN_SERVERS, ...DEFAULT_ICE_SERVERS];
@@ -815,12 +817,13 @@
                 const p = initPeer();
                 setIsHost(false);
 
+                // Increased timeout from 15s to 30s for 5G/Mobile latency
                 const connectionTimeout = setTimeout(() => {
                     if (isJoining) {
                         setIsJoining(false);
-                        showToast("连接超时。请检查房间号或网络状况", 5000);
+                        showToast("连接超时。请检查房间号或网络状况 (建议使用WiFi)", 5000);
                     }
-                }, 15000); // Extended timeout for TURN
+                }, 30000); 
                 
                 const connect = () => {
                     if (hostConn) hostConn.close();
@@ -842,7 +845,7 @@
                     conn.on('error', (err) => { 
                          clearTimeout(connectionTimeout);
                          setIsJoining(false);
-                         showToast("连接失败: " + err); 
+                         showToast("连接失败: " + err + " (请尝试切换网络)"); 
                     });
                 };
 
