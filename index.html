@@ -103,7 +103,8 @@
             usePrivateServer: true, // 默认开启
             host: "118.31.222.7",   // 你的阿里云公网IP
             port: 9000,
-            path: "/salem-game"
+            path: "/salem-game",
+            secure: false // 必须显式设置为 false，否则 PeerJS 可能尝试 SSL 连接
         };
 
         const View = {
@@ -359,7 +360,7 @@
                                 </div>
                                 <p className="text-[#a8a29e] text-xs leading-relaxed">
                                     {usePrivateNet 
-                                        ? "当前配置：118.31.222.7 (Windows Server)。如显示“Failed to fetch”，请检查服务器端程序是否运行。" 
+                                        ? "当前配置：118.31.222.7 (Windows Server)。如连接失败，请检查服务器上的 Windows 防火墙是否开放 9000 端口。" 
                                         : "当前配置：公共测试节点。速度较慢，仅供临时使用。"}
                                 </p>
                             </div>
@@ -386,12 +387,13 @@
                     </h3>
                     <div className="space-y-4 font-serif text-[#a8a29e]">
                         <div className="bg-[#292524] p-4 rounded border border-[#44403c]">
-                            <p className="mb-2 flex items-center gap-2"><strong className="text-[#b45309]">1. 服务器配置向导</strong></p>
-                            <p className="text-sm">镇长正在将游戏迁移至 <span className="text-amber-500 font-bold">阿里云 Windows Server (118.31.222.7)</span>！</p>
-                            <p className="text-sm mt-2 text-[#e7e5e4]">
-                                如果你看到“Connection Error”或“Failed to fetch”，说明你的服务器还没启动。
-                                <strong>请点击主页右下角的设置图标，暂时切换为「公共节点」</strong>，直到你在服务器上运行了 server.js。
-                            </p>
+                            <p className="mb-2 flex items-center gap-2"><strong className="text-[#b45309]">1. 连接问题急救指南</strong></p>
+                            <p className="text-sm">如果你看到了 "Failed to fetch" 或无法创建房间：</p>
+                            <ul className="text-sm mt-2 space-y-1 list-disc pl-5 text-[#e7e5e4]">
+                                <li><strong className="text-red-400">检查 Windows 防火墙</strong>：这是最常见的原因！必须在服务器的“Windows Defender 防火墙”入站规则中开放 9000 端口。</li>
+                                <li><strong>检查安全组</strong>：阿里云控制台的安全组是否放行了 TCP 9000？</li>
+                                <li><strong>检查服务程序</strong>：服务器上的黑色窗口（Node.js）不能关闭。</li>
+                            </ul>
                         </div>
                         <div className="bg-[#292524] p-4 rounded border border-[#44403c]">
                             <p className="mb-2"><strong className="text-[#b45309]">2. 联机说明：</strong></p>
@@ -762,6 +764,7 @@
                         host: ServerConfig.host,
                         port: ServerConfig.port,
                         path: ServerConfig.path,
+                        secure: ServerConfig.secure, // Force http unless configured otherwise
                         debug: 2,
                     });
                 } else {
@@ -821,13 +824,18 @@
                 });
 
                 newPeer.on('error', (err) => {
+                    console.error("Peer Error:", err);
                     let msg = "网络错误";
+                    
                     if (err.type === 'peer-unavailable') msg = "找不到该房间或房主已离线";
                     else if (err.type === 'unavailable-id') msg = "ID已被占用，请刷新重试";
-                    else if (err.type === 'network' || err.type === 'server-error' || err.type === 'socket-error' || err.message.includes("fetch")) {
-                         msg = usePrivateNet ? "连接服务器失败! 请检查服务器是否运行，或在设置中切换回公共节点。" : "网络连接失败，请尝试切换WiFi/热点";
+                    else if (err.message && (err.message.includes("fetch") || err.message.includes("network"))) {
+                         msg = usePrivateNet 
+                            ? "连接失败！请检查：1.阿里云安全组端口9000 2.Windows防火墙入站规则 3.服务器黑窗口是否开着" 
+                            : "网络连接失败";
                     }
-                    showToast(`${msg} (${err.type || 'Error'})`, 6000);
+                    
+                    showToast(`${msg} (${err.type || 'Error'})`, 8000);
                 });
 
                 setPeer(newPeer);
