@@ -93,9 +93,18 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef } from 'react';
         import { createRoot } from 'react-dom/client';
-        import { Shield, Skull, Zap, Eye, Users, Moon, Gavel, Search, Lock, Heart, Home, Cat, RotateCcw, BookOpen, Play, Hand, X, Layers, Scale, Copy, Check, UserPlus, Crown, Volume2, Settings, Music, Link, Loader2, Info } from 'lucide-react';
+        import { Shield, Skull, Zap, Eye, Users, Moon, Gavel, Search, Lock, Heart, Home, Cat, RotateCcw, BookOpen, Play, Hand, X, Layers, Scale, Copy, Check, UserPlus, Crown, Volume2, Settings, Music, Link, Loader2, Info, Server } from 'lucide-react';
 
         // --- Constants & Types ---
+        
+        // --- 阿里云私有服务器配置 (ALIBABA CLOUD CONFIG) ---
+        // 已配置为你的 Windows Server 2022 实例
+        const ServerConfig = {
+            usePrivateServer: true, // 已开启私有服务器模式
+            host: "118.31.222.7",   // 你的阿里云公网IP
+            port: 9000,
+            path: "/salem-game"
+        };
 
         const View = {
             LANDING: 'LANDING',
@@ -334,6 +343,11 @@
                                     className="w-full h-2 bg-[#44403c] rounded-lg appearance-none cursor-pointer accent-[#78350f]"
                                 />
                             </div>
+                            
+                            <div className="bg-[#292524] p-4 rounded border border-[#44403c] flex items-center gap-2 text-[#a8a29e] text-xs">
+                                <Server size={14} className={ServerConfig.usePrivateServer ? "text-green-500" : "text-yellow-500"} />
+                                <span>当前网络: {ServerConfig.usePrivateServer ? "阿里云专线 (高速)" : "公共节点 (较慢)"}</span>
+                            </div>
                         </div>
 
                         <div className="mt-6 text-center">
@@ -357,14 +371,19 @@
                     </h3>
                     <div className="space-y-4 font-serif text-[#a8a29e]">
                         <div className="bg-[#292524] p-4 rounded border border-[#44403c]">
-                            <p className="mb-2"><strong className="text-[#b45309]">1. 联机说明：</strong></p>
-                            <p className="text-sm">游戏目前联机对战还有严重BUG，如果大家想和朋友对战可以开热点或者在同一wifi下可以进入房间进行对战。</p>
-                            <p className="text-sm mt-2 text-green-400 font-bold">✨ 更新日志：已针对5G/移动网络进行连接优化 (新增国内STUN节点)，请尝试重新连接。</p>
+                            <p className="mb-2 flex items-center gap-2"><strong className="text-[#b45309]">1. 私有服务器已上线！</strong></p>
+                            <p className="text-sm">镇长已成功部署 <span className="text-amber-500 font-bold">阿里云服务器 (118.31.222.7)</span>！</p>
+                            <p className="text-sm mt-2">
+                                只要服务器端的程序正常运行，现在创建房间和加入游戏将享受极速体验，彻底告别「连接超时」和「5G无法连接」的问题。
+                            </p>
                         </div>
                         <div className="bg-[#292524] p-4 rounded border border-[#44403c]">
-                            <p className="mb-2"><strong className="text-[#b45309]">2. 开发说明：</strong></p>
+                            <p className="mb-2"><strong className="text-[#b45309]">2. 联机说明：</strong></p>
+                            <p className="text-sm">确保你的 Windows Server 上的 Node.js 服务窗口保持开启。如果连接失败，请检查服务器防火墙（安全组）的 9000 端口是否已放行。</p>
+                        </div>
+                        <div className="bg-[#292524] p-4 rounded border border-[#44403c]">
+                            <p className="mb-2"><strong className="text-[#b45309]">3. 开发说明：</strong></p>
                             <p className="text-sm mb-2">游戏现在还属于开发阶段，角色技能还有卡牌效果等还有很多问题等待修复。</p>
-                            <p className="text-sm">有任何建议或者BUG反馈都可以发送至：</p>
                             <ul className="text-sm mt-1 space-y-1 text-[#e7e5e4]">
                                 <li>微信: <span className="select-all">aonlyxu</span></li>
                                 <li>E-mail: <span className="select-all">nanzi_07@qq.com</span></li>
@@ -717,42 +736,55 @@
                     return peer;
                 }
 
-                // Configured with credentials from screenshot
-                const METERED_TURN_SERVERS = [
-                    {
-                        urls: "turn:global.turn.metered.ca:80",
-                        username: "1cf33e7d2b90f26f46938214",
-                        credential: "JJyP8t6OdH8Fmz7k"
-                    },
-                    {
-                        urls: "turn:global.turn.metered.ca:443",
-                        username: "1cf33e7d2b90f26f46938214",
-                        credential: "JJyP8t6OdH8Fmz7k"
-                    },
-                    {
-                        urls: "turn:global.turn.metered.ca:443?transport=tcp",
-                        username: "1cf33e7d2b90f26f46938214",
-                        credential: "JJyP8t6OdH8Fmz7k"
-                    }
-                ];
+                let newPeer;
 
-                // ADDED: Chinese domestic STUN servers to fix 5G/Mobile connection issues
-                // Google STUN is often blocked or slow in CN, causing failures on 5G.
-                const DEFAULT_ICE_SERVERS = [
-                    { urls: 'stun:stun.qq.com:3478' },
-                    { urls: 'stun:stun.miwifi.com:3478' },
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' }
-                ];
+                if (ServerConfig.usePrivateServer && ServerConfig.host !== "YOUR_ALIBABA_IP_HERE") {
+                    // --- 私有阿里云服务器模式 ---
+                    console.log("Connecting to Private Alibaba Cloud Server:", ServerConfig.host);
+                    newPeer = new window.Peer(null, {
+                        host: ServerConfig.host,
+                        port: ServerConfig.port,
+                        path: ServerConfig.path,
+                        debug: 2,
+                    });
+                } else {
+                    // --- 公共节点模式 (Public Cloud) ---
+                    // Configured with credentials from screenshot
+                    const METERED_TURN_SERVERS = [
+                        {
+                            urls: "turn:global.turn.metered.ca:80",
+                            username: "1cf33e7d2b90f26f46938214",
+                            credential: "JJyP8t6OdH8Fmz7k"
+                        },
+                        {
+                            urls: "turn:global.turn.metered.ca:443",
+                            username: "1cf33e7d2b90f26f46938214",
+                            credential: "JJyP8t6OdH8Fmz7k"
+                        },
+                        {
+                            urls: "turn:global.turn.metered.ca:443?transport=tcp",
+                            username: "1cf33e7d2b90f26f46938214",
+                            credential: "JJyP8t6OdH8Fmz7k"
+                        }
+                    ];
 
-                const iceServersToUse = [...METERED_TURN_SERVERS, ...DEFAULT_ICE_SERVERS];
+                    // Google STUN is often blocked or slow in CN, causing failures on 5G.
+                    const DEFAULT_ICE_SERVERS = [
+                        { urls: 'stun:stun.qq.com:3478' },
+                        { urls: 'stun:stun.miwifi.com:3478' },
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' }
+                    ];
 
-                const newPeer = new window.Peer(null, { 
-                    debug: 2,
-                    config: {
-                        iceServers: iceServersToUse
-                    }
-                });
+                    const iceServersToUse = [...METERED_TURN_SERVERS, ...DEFAULT_ICE_SERVERS];
+
+                    newPeer = new window.Peer(null, { 
+                        debug: 2,
+                        config: {
+                            iceServers: iceServersToUse
+                        }
+                    });
+                }
                 
                 newPeer.on('open', (id) => {
                     console.log("Peer Opened with ID:", id);
@@ -775,7 +807,9 @@
                     let msg = "网络错误";
                     if (err.type === 'peer-unavailable') msg = "找不到该房间或房主已离线";
                     else if (err.type === 'unavailable-id') msg = "ID已被占用，请刷新重试";
-                    else if (err.type === 'network' || err.type === 'server-error') msg = "网络连接失败，请尝试切换WiFi/热点";
+                    else if (err.type === 'network' || err.type === 'server-error') {
+                         msg = ServerConfig.usePrivateServer ? "连接私有服务器失败 (请检查9000端口)" : "网络连接失败，请尝试切换WiFi/热点";
+                    }
                     showToast(`${msg} (${err.type})`);
                 });
 
@@ -821,7 +855,8 @@
                 const connectionTimeout = setTimeout(() => {
                     if (isJoining) {
                         setIsJoining(false);
-                        showToast("连接超时。请检查房间号或网络状况 (建议使用WiFi)", 5000);
+                        const tip = ServerConfig.usePrivateServer ? "请确认房主已开启服务器" : "请检查房间号或网络";
+                        showToast(`连接超时。${tip}`, 5000);
                     }
                 }, 30000); 
                 
