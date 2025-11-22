@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -429,7 +428,7 @@
         // --- PLAYER AVATAR ---
         const PlayerAvatar = ({ 
             player, myPlayerId, allPlayers, currentPlayerId, isActive, 
-            blackCatHolderId, protectionTargetId, isTargetable, onSelect, lastWitchVotes, isMe,
+            blackCatHolderId, protectionTargetId, isTargetable, isTargetableForIdentity, onSelect, lastWitchVotes, isMe,
             revealMode, girlTrialMode, playerName
         }) => {
             const hasBlackCat = blackCatHolderId === player.id;
@@ -447,12 +446,12 @@
             // Compact size for 4-column layout on mobile
             const sizeClass = "w-12 md:w-16"; 
             
-            const isRevealTarget = revealMode && isTargetable; 
+            const isRevealTarget = revealMode && isTargetableForIdentity;
             const isGirlTarget = girlTrialMode && !player.isDead && player.id !== myPlayerId;
 
             return (
                 <div 
-                    onClick={() => (isTargetable || isGirlTarget) && onSelect()} 
+                    onClick={() => (isTargetable || isRevealTarget || isGirlTarget) && onSelect()} 
                     className={`
                         relative flex flex-col
                         ${sizeClass}
@@ -717,16 +716,39 @@
                     return peer;
                 }
 
+                // Configured with credentials from screenshot
+                const METERED_TURN_SERVERS = [
+                    {
+                        urls: "turn:global.turn.metered.ca:80",
+                        username: "1cf33e7d2b90f26f46938214",
+                        credential: "JJyP8t6OdH8Fmz7k"
+                    },
+                    {
+                        urls: "turn:global.turn.metered.ca:443",
+                        username: "1cf33e7d2b90f26f46938214",
+                        credential: "JJyP8t6OdH8Fmz7k"
+                    },
+                    {
+                        urls: "turn:global.turn.metered.ca:443?transport=tcp",
+                        username: "1cf33e7d2b90f26f46938214",
+                        credential: "JJyP8t6OdH8Fmz7k"
+                    }
+                ];
+
+                const DEFAULT_ICE_SERVERS = [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    { urls: 'stun:stun3.l.google.com:19302' },
+                    { urls: 'stun:stun4.l.google.com:19302' }
+                ];
+
+                const iceServersToUse = [...METERED_TURN_SERVERS, ...DEFAULT_ICE_SERVERS];
+
                 const newPeer = new window.Peer(null, { 
                     debug: 2,
                     config: {
-                        iceServers: [
-                            { urls: 'stun:stun.l.google.com:19302' },
-                            { urls: 'stun:stun1.l.google.com:19302' },
-                            { urls: 'stun:stun2.l.google.com:19302' },
-                            { urls: 'stun:stun3.l.google.com:19302' },
-                            { urls: 'stun:stun4.l.google.com:19302' }
-                        ]
+                        iceServers: iceServersToUse
                     }
                 });
                 
@@ -796,9 +818,9 @@
                 const connectionTimeout = setTimeout(() => {
                     if (isJoining) {
                         setIsJoining(false);
-                        showToast("连接超时。请检查房间号或网络状况 (建议在同WiFi下尝试)", 5000);
+                        showToast("连接超时。请检查房间号或网络状况", 5000);
                     }
-                }, 10000);
+                }, 15000); // Extended timeout for TURN
                 
                 const connect = () => {
                     if (hostConn) hostConn.close();
@@ -1949,12 +1971,12 @@
                         <h1 className="text-6xl md:text-8xl font-black text-[#e7e5e4] tracking-wider mb-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] font-serif">女巫镇</h1>
                         <p className="text-xl text-[#a8a29e] italic mb-12 font-serif px-4 tracking-widest">“小镇即将迎来它的第一波客人...”</p>
                         
-                        <div className="flex flex-row gap-3 justify-center items-center w-full overflow-x-auto no-scrollbar px-4 py-6">
+                        <div className="flex flex-row gap-3 justify-center items-center w-full overflow-x-auto no-scrollbar px-4 py-10">
                              <LandingButton onClick={() => { setIsHost(false); setView(View.JOIN_ROOM); }} icon={UserPlus} label="加入房间" color="brown" />
                              <LandingButton onClick={startSetupHost} icon={Users} label="好友对战" color="purple" />
                              <LandingButton onClick={() => setView(View.RULES)} icon={BookOpen} label="游戏规则" color="dark" />
-                             <LandingButton onClick={() => setIsAnnouncementsOpen(true)} icon={Volume2} label="小镇公告" color="dark" />
                              <LandingButton onClick={() => setIsSettingsOpen(true)} icon={Settings} label="游戏设置" color="dark" />
+                             <LandingButton onClick={() => setIsAnnouncementsOpen(true)} icon={Volume2} label="小镇公告" color="dark" />
                         </div>
                     </div>
                 </div>
@@ -2349,6 +2371,7 @@
                                                 protectionTargetId={visibleProtectionTargetId}
                                                 lastWitchVotes={lastWitchVotes}
                                                 isTargetable={isDayTargetable || isNightTargetable || isConspiracyTargetable || isRevealPhase}
+                                                isTargetableForIdentity={isRevealPhase}
                                                 revealMode={isRevealPhase}
                                                 girlTrialMode={girlTrialMode}
                                                 playerName={p.name}
