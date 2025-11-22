@@ -1,599 +1,2126 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>女巫镇 - 1692塞勒姆审判</title>
-    <!-- Tailwind CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>女巫镇</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#0A0A0A',
-                        secondary: '#8B0000',
-                        accent: '#D4AF37',
-                        dark: '#1A1A1A',
-                        light: '#E0E0E0',
-                        purple: {
-                            dark: '#2D1B4E',
-                            light: '#5C27FE'
-                        }
-                    },
-                    fontFamily: {
-                        inter: ['Inter', 'sans-serif']
-                    },
-                    animation: {
-                        'float': 'float 6s ease-in-out infinite',
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite'
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' }
-                        }
-                    }
-                }
-            }
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+            "lucide-react": "https://esm.sh/lucide-react@0.263.1"
         }
+    }
     </script>
-    
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- PeerJS for P2P Multiplayer -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
     <style>
-        /* 自定义样式 */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0A0A0A;
-            color: #E0E0E0;
-            overflow-x: hidden;
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&display=swap');
+        
+        /* Theme: Dark Witch / Black Town */
+        :root {
+            --bg-paper: #1c1917; /* Lighter Stone for base */
+            --bg-panel: rgba(41, 37, 36, 0.90); /* Slightly lighter panel */
+            --text-ink: #e7e5e4; 
+            --text-muted: #a8a29e;
+            --accent-brown: #78350f;
+            --accent-gold: #b45309;
+            --accent-red: #991b1b;
+            --border-color: #57534e;
+        }
+
+        body { 
+            font-family: 'Noto Serif SC', serif; 
+            background-color: var(--bg-paper); 
+            color: var(--text-ink); 
+            overflow: hidden; 
+            /* Radial Gradient + Noise for Depth */
+            background-image: 
+                url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E"),
+                radial-gradient(circle at center, #292524 0%, #0c0a09 100%);
+            background-blend-mode: overlay, normal;
+            background-size: cover;
         }
         
-        /* 渐变背景 */
-        .bg-gradient-dark {
-            background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%);
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .animate-fade-in { animation: fadeIn 1s ease-out; }
+        .animate-slide-up { animation: slideUp 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translate(0, 20px); opacity: 0; } to { transform: translate(0, 0); opacity: 1; } }
+        
+        .glass-panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(8px);
+            border: 2px solid #57534e; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
         }
         
-        .bg-gradient-purple {
-            background: linear-gradient(135deg, #2D1B4E 0%, #1A1A1A 100%);
-        }
-        
-        /* 金色文字 */
-        .gold-text {
-            color: #D4AF37;
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
-        }
-        
-        /* 霓虹文字 */
-        .neon-text {
-            color: #5C27FE;
-            text-shadow: 0 0 10px rgba(92, 39, 254, 0.7);
-        }
-        
-        /* 按钮样式 */
-        .btn-primary {
-            background: linear-gradient(135deg, #D4AF37 0%, #F5DEB3 100%);
-            color: #0A0A0A;
-            font-weight: 600;
-            padding: 0.75rem 2rem;
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(212, 175, 55, 0.4);
-        }
-        
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: all 0.6s ease;
-            z-index: -1;
-        }
-        
-        .btn-primary:hover::before {
-            left: 100%;
-        }
-        
-        .btn-secondary {
-            background: transparent;
-            color: #D4AF37;
-            border: 2px solid #D4AF37;
-            font-weight: 600;
-            padding: 0.75rem 2rem;
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-secondary:hover {
-            background: rgba(212, 175, 55, 0.1);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(212, 175, 55, 0.2);
-        }
-        
-        /* 卡片样式 */
-        .card {
-            background: rgba(26, 26, 26, 0.8);
-            border-radius: 1rem;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(212, 175, 55, 0.1);
-            transition: all 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border-color: rgba(212, 175, 55, 0.3);
-        }
-        
-        /* 导航栏 */
-        .navbar {
-            background: rgba(10, 10, 10, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
-        }
-        
-        /* 滚动动画 */
-        .fade-in {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-        }
-        
-        .fade-in.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        /* 自定义滚动条 */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #0A0A0A;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #D4AF37;
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #F5DEB3;
-        }
-        
-        /* 分隔线 */
-        .divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
-            margin: 3rem 0;
-        }
-        
-        /* 光晕效果 */
-        .glow {
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
-        }
-        
-        /* 粒子背景 */
-        #particles-js {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: -1;
-        }
-        
-        /* 英雄区域 */
-        .hero {
-            position: relative;
-            height: 100vh;
-            overflow: hidden;
-        }
-        
-        .hero-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: -1;
-        }
-        
-        .hero-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, rgba(10, 10, 10, 0.5), rgba(10, 10, 10, 0.9));
-            z-index: -1;
-        }
-        
-        /* 游戏特色图标 */
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(212, 175, 55, 0.1) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
-        }
-        
-        .feature-card:hover .feature-icon {
-            transform: scale(1.1);
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0.2) 100%);
-        }
-        
-        /* 表单样式 */
-        .form-input {
-            background: rgba(26, 26, 26, 0.8);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            color: #E0E0E0;
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
-        }
-        
-        .form-input:focus {
+        /* Range Slider Customization */
+        input[type=range] {
+            height: 6px;
+            background: #44403c;
+            border-radius: 5px;
             outline: none;
-            border-color: #D4AF37;
-            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
         }
-        
-        /* 响应式调整 */
-        @media (max-width: 768px) {
-            .hero {
-                height: auto;
-                min-height: 100vh;
-            }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #78350f;
+            cursor: pointer;
+            border: 2px solid #a8a29e;
+        }
+
+        .card-shadow {
+             box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
         }
     </style>
+<link rel="stylesheet" href="/index.css">
 </head>
-<body class="font-inter">
-    <!-- 粒子背景 -->
-    <div id="particles-js"></div>
-    
-    <!-- 导航栏 -->
-    <nav class="navbar fixed top-0 w-full z-50 py-4">
-        <div class="container mx-auto px-4 flex justify-between items-center">
-            <div class="flex items-center">
-                <span class="text-accent text-2xl mr-2"><i class="fas fa-book-of-witchcraft"></i></span>
-                <h1 class="text-2xl font-bold gold-text">Salem 1692</h1>
-            </div>
-            <div class="hidden md:flex space-x-8">
-                <a href="#home" class="hover:text-accent transition-colors duration-300">首页</a>
-                <a href="#gameplay" class="hover:text-accent transition-colors duration-300">游戏玩法</a>
-                <a href="#thanks" class="hover:text-accent transition-colors duration-300">特别感谢</a>
-                <a href="#contact" class="hover:text-accent transition-colors duration-300">联系我们</a>
-            </div>
-            <div class="md:hidden">
-                <button id="mobile-menu-button" class="text-light focus:outline-none">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-            </div>
-        </div>
-        <!-- 移动端菜单 -->
-        <div id="mobile-menu" class="hidden md:hidden bg-dark/95 mt-2 py-4 px-4 absolute w-full">
-            <div class="flex flex-col space-y-4">
-                <a href="#home" class="hover:text-accent transition-colors duration-300">首页</a>
-                <a href="#gameplay" class="hover:text-accent transition-colors duration-300">游戏玩法</a>
-                <a href="#thanks" class="hover:text-accent transition-colors duration-300">特别感谢</a>
-                <a href="#contact" class="hover:text-accent transition-colors duration-300">联系我们</a>
-            </div>
-        </div>
-    </nav>
+<body>
+    <div id="root"></div>
 
-    <!-- 主视觉区域 -->
-    <section id="home" class="hero flex items-center justify-center">
-        <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/be0b5a4eaf8a47ad870b323c36f0ac07~tplv-a9rns2rl98-image.image?rcl=202511211526493267063FB378B157303D&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1766302019&x-signature=hcNwmSZy%2FT%2FCBn3aQD%2FSqdjX%2FwM%3D" alt="女巫镇游戏背景" class="hero-bg">
-        <div class="hero-overlay"></div>
-        <div class="container mx-auto px-4 text-center relative z-10">
-            <div class="max-w-3xl mx-auto">
-                <h1 class="text-5xl md:text-7xl font-bold gold-text mb-6 animate-float">女巫镇</h1>
-                <p class="text-2xl md:text-3xl mb-8 neon-text">1692 塞勒姆审判</p>
-                <p class="text-base md:text-lg mb-12 max-w-2xl mx-auto">
-                    一场关于指控、背叛与生存的策略卡牌游戏
-                </p>
-                <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <a href="#contact" class="btn-primary">
-                        联系我们
-                    </a>
-                    <a href="#gameplay" class="btn-secondary">
-                        了解更多
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect, useRef } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { Shield, Skull, Zap, Eye, Users, Moon, Gavel, Search, Lock, Heart, Home, Cat, RotateCcw, BookOpen, Play, Hand, X, Layers, Scale, Copy, Check, UserPlus, Crown } from 'lucide-react';
 
-    <!-- 游戏玩法 -->
-    <section id="gameplay" class="py-20 bg-gradient-dark">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl font-bold gold-text mb-4">游戏玩法</h2>
-                <div class="w-24 h-1 bg-accent mx-auto"></div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                <div class="fade-in">
-                    <p class="text-lg mb-6 leading-relaxed">
-                        多人联机，推理怀疑猜测谋杀一个都不会少。在《女巫镇》中，每位玩家将扮演塞勒姆镇的一名居民，其中部分玩家是隐藏的女巫。通过抽卡和出牌，你可以指控可疑之人，也可以为盟友提供保护。
-                    </p>
-                    <p class="text-lg mb-8 leading-relaxed">
-                        随着游戏进行，怀疑的氛围将越来越浓厚。当"夜晚"来临时，女巫们将行动起来，试图消灭无辜的镇民。而你，能否在这场心理博弈中生存下来，揭露真相？
-                    </p>
-                    <a href="#contact" class="btn-primary inline-block">
-                        联系我们
-                    </a>
-                </div>
-                
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div class="feature-card card p-6 text-center fade-in" style="transition-delay: 0.2s;">
-                        <div class="feature-icon mx-auto">
-                            <i class="fas fa-users text-2xl text-accent"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-2">多人联机</h3>
-                        <p class="text-gray-400">与朋友一起，体验紧张刺激的多人对战</p>
-                    </div>
-                    
-                    <div class="feature-card card p-6 text-center fade-in" style="transition-delay: 0.4s;">
-                        <div class="feature-icon mx-auto">
-                            <i class="fas fa-search text-2xl text-accent"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-2">推理怀疑</h3>
-                        <p class="text-gray-400">通过逻辑推理，找出隐藏在人群中的女巫</p>
-                    </div>
-                    
-                    <div class="feature-card card p-6 text-center fade-in" style="transition-delay: 0.6s;">
-                        <div class="feature-icon mx-auto">
-                            <i class="fas fa-question-circle text-2xl text-accent"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-2">猜测</h3>
-                        <p class="text-gray-400">在信息不足的情况下，做出最明智的判断</p>
-                    </div>
-                    
-                    <div class="feature-card card p-6 text-center fade-in" style="transition-delay: 0.8s;">
-                        <div class="feature-icon mx-auto">
-                            <i class="fas fa-crosshairs text-2xl text-accent"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-2">谋杀</h3>
-                        <p class="text-gray-400">作为女巫，巧妙地消灭对手而不被发现</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+        // --- Constants & Types ---
 
-    <!-- 特别感谢 -->
-    <section id="thanks" class="py-20 bg-gradient-purple">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl font-bold gold-text mb-4">特别感谢</h2>
-                <div class="w-24 h-1 bg-accent mx-auto"></div>
-            </div>
-            
-            <div class="card p-8 max-w-4xl mx-auto fade-in">
-                <p class="text-lg mb-6 text-center">
-                    游戏正在紧急开发中，在此特别感谢以下朋友对游戏开发过程中测试BUG的反馈（排名不分前后）：
-                </p>
-                <div class="flex flex-wrap justify-center gap-3">
-                    <span class="bg-purple-dark/30 text-light px-3 py-1 rounded-full text-sm border border-purple-light/20">俊坤</span>
-                    <span class="bg-purple-dark/30 text-light px-3 py-1 rounded-full text-sm border border-purple-light/20">薇薇</span>
-                    <span class="bg-purple-dark/30 text-light px-3 py-1 rounded-full text-sm border border-purple-light/20">李源琦</span>
-                    <span class="bg-purple-dark/30 text-light px-3 py-1 rounded-full text-sm border border-purple-light/20">昊昊</span>
-                    <span class="bg-purple-dark/30 text-light px-3 py-1 rounded-full text-sm border border-purple-light/20">煎饼</span>
-                    <span class="bg-purple-dark/30 text-light px-3 py-1 rounded-full text-sm border border-purple-light/20">洋秘</span>
-                    <span class="bg-purple-dark/30 text-light px-3 py-1 rounded-full text-sm border border-purple-light/20">美女丁</span>
-                </div>
-            </div>
-        </div>
-    </section>
+        const View = {
+            LANDING: 'LANDING',
+            RULES: 'RULES',
+            SETUP_HOST: 'SETUP_HOST',
+            JOIN_ROOM: 'JOIN_ROOM',
+            WAITING_ROOM: 'WAITING_ROOM',
+            CHAR_SELECT: 'CHAR_SELECT',
+            GAME: 'GAME'
+        };
 
-    <!-- 联系我们 -->
-    <section id="contact" class="py-20 bg-gradient-dark">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl font-bold gold-text mb-4">联系我们</h2>
-                <div class="w-24 h-1 bg-accent mx-auto"></div>
-                <p class="mt-4 text-lg max-w-2xl mx-auto">扫描下方二维码，关注游戏最新动态</p>
-            </div>
-            
-            <div class="max-w-md mx-auto">
-                <div class="card p-8 glow fade-in text-center">
-                    <div class="mb-8">
-                        <img src="https://p26-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/7ffc8bd27b3e4ea6bd3d287899a928e5.jpg~tplv-a9rns2rl98-24:720:720.image?rcl=202511211534170B0B2AE5BD4C66379EEA&rk3s=8e244e95&rrcfp=8a172a1a&x-expires=1764315257&x-signature=QbyWvNBqlEkEL0NNBvmIMcmYOv0%3D" alt="微信二维码" class="w-64 h-64 mx-auto border-4 border-accent/30 rounded-lg shadow-lg">
-                    </div>
-                    <p class="text-lg gold-text mb-4">欢迎添加微信，了解游戏最新进展</p>
-                    <p class="text-gray-400">我们将定期更新游戏开发进度，分享测试资格</p>
-                </div>
-            </div>
-        </div>
-    </section>
+        const Phase = {
+            INITIAL_NIGHT: 'INITIAL_NIGHT',     
+            DAY_TURN: 'DAY_TURN',               
+            NIGHT_CYCLE: 'NIGHT_CYCLE',         
+            NIGHT_WITCH: 'NIGHT_WITCH',
+            NIGHT_CONSTABLE: 'NIGHT_CONSTABLE',
+            DAWN_PRE_ANNOUNCE: 'DAWN_PRE_ANNOUNCE', 
+            DAWN_CONFESSION: 'DAWN_CONFESSION', 
+            DAWN_REVEAL: 'DAWN_REVEAL',         
+            GAME_OVER: 'GAME_OVER',
+            RESOLVE_CONSPIRACY_REVEAL: 'RESOLVE_CONSPIRACY_REVEAL', 
+            RESOLVE_CONSPIRACY_ROTATION: 'RESOLVE_CONSPIRACY_ROTATION', 
+            RESOLVE_CONSPIRACY_COMPLETED: 'RESOLVE_CONSPIRACY_COMPLETED',
+            TRIAL_REVEAL: 'TRIAL_REVEAL'        
+        };
 
+        const CardType = {
+            TRIAL: 'TRIAL', 
+            RED: 'RED',     
+            BLUE: 'BLUE',   
+            GREEN: 'GREEN', 
+            BLACK: 'BLACK'  
+        };
 
+        const Identity = {
+            VILLAGER: 'VILLAGER',
+            WITCH: 'WITCH',
+            CONSTABLE: 'CONSTABLE'
+        };
 
-    <!-- Particles.js -->
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    
-    <script>
-        // 粒子背景配置
-        document.addEventListener('DOMContentLoaded', function() {
-            particlesJS('particles-js', {
-                "particles": {
-                    "number": {
-                        "value": 80,
-                        "density": {
-                            "enable": true,
-                            "value_area": 800
-                        }
-                    },
-                    "color": {
-                        "value": "#D4AF37"
-                    },
-                    "shape": {
-                        "type": "circle",
-                        "stroke": {
-                            "width": 0,
-                            "color": "#000000"
-                        }
-                    },
-                    "opacity": {
-                        "value": 0.2,
-                        "random": true,
-                        "anim": {
-                            "enable": true,
-                            "speed": 1,
-                            "opacity_min": 0.1,
-                            "sync": false
-                        }
-                    },
-                    "size": {
-                        "value": 3,
-                        "random": true,
-                        "anim": {
-                            "enable": true,
-                            "speed": 2,
-                            "size_min": 0.1,
-                            "sync": false
-                        }
-                    },
-                    "line_linked": {
-                        "enable": true,
-                        "distance": 150,
-                        "color": "#D4AF37",
-                        "opacity": 0.1,
-                        "width": 1
-                    },
-                    "move": {
-                        "enable": true,
-                        "speed": 1,
-                        "direction": "none",
-                        "random": true,
-                        "straight": false,
-                        "out_mode": "out",
-                        "bounce": false,
-                        "attract": {
-                            "enable": false,
-                            "rotateX": 600,
-                            "rotateY": 1200
-                        }
-                    }
-                },
-                "interactivity": {
-                    "detect_on": "canvas",
-                    "events": {
-                        "onhover": {
-                            "enable": true,
-                            "mode": "grab"
-                        },
-                        "onclick": {
-                            "enable": true,
-                            "mode": "push"
-                        },
-                        "resize": true
-                    },
-                    "modes": {
-                        "grab": {
-                            "distance": 140,
-                            "line_linked": {
-                                "opacity": 0.3
-                            }
-                        },
-                        "push": {
-                            "particles_nb": 3
-                        }
-                    }
-                },
-                "retina_detect": true
-            });
-        });
-        
-        // 移动端菜单切换
-        document.getElementById('mobile-menu-button').addEventListener('click', function() {
-            const mobileMenu = document.getElementById('mobile-menu');
-            mobileMenu.classList.toggle('hidden');
-        });
-        
-        // 滚动动画
-        document.addEventListener('DOMContentLoaded', function() {
-            const fadeElements = document.querySelectorAll('.fade-in');
-            
-            function checkFade() {
-                fadeElements.forEach(element => {
-                    const elementTop = element.getBoundingClientRect().top;
-                    const elementVisible = 150;
-                    
-                    if (elementTop < window.innerHeight - elementVisible) {
-                        element.classList.add('active');
-                    }
-                });
-            }
-            
-            window.addEventListener('scroll', checkFade);
-            checkFade(); // 初始检查
-        });
-        
-        // 表单提交
-        document.getElementById('signup-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const platform = document.getElementById('platform').value;
-            
-            if (!name || !email || !platform) {
-                alert('请填写完整信息');
-                return;
-            }
-            
-            // 模拟表单提交
-            alert(`感谢 ${name} 的预约！我们将通过 ${email} 通知您游戏测试的最新消息。`);
-            
-            // 重置表单
-            this.reset();
-        });
-        
-        // 平滑滚动
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                const targetId = this.getAttribute('href');
-                const targetElement = document.querySelector(targetId);
-                
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 80,
-                        behavior: 'smooth'
+        const CHARACTERS = [
+            { id: 'official', name: '官员', desc: '每局一次：自首时不翻开身份牌' },
+            { id: 'farmer', name: '农民', desc: '玩家死亡时自动获得其所有手牌和蓝卡' },
+            { id: 'doctor', name: '医生', desc: '可用「辩护」卡作为「目击」使用' },
+            { id: 'landlord', name: '地主', desc: '抽到两张指控时直接额外摸一张' },
+            { id: 'girl', name: '少女', desc: '若手牌满足7张指控，可直接审判并奖励摸牌2张' },
+            { id: 'storyteller', name: '说书人', desc: '每局一次：抽牌前可调换牌堆顺序' },
+            { id: 'judge', name: '法官', desc: '打出第6张指控时可直接审判玩家' },
+            { id: 'priest', name: '牧师', desc: '游戏两次：抽牌时可从弃牌堆选两张非黑牌' },
+            { id: 'housewife', name: '家庭主妇', desc: '场上无其他玩家身份被翻开时获得一张手牌' },
+            { id: 'maid', name: '女仆', desc: '免疫「黑猫」和「情侣」效果' },
+            { id: 'tailor', name: '裁缝', desc: '技能与右手边第一名活着的玩家一致' },
+            { id: 'strongman', name: '大力士', desc: '需累计8张指控才可审判' },
+            { id: 'minister', name: '部长', desc: '对部长打出的「证据」仅算作一张指控' },
+            { id: 'child', name: '小孩', desc: '发起审判后清空自身所有指控和证据' },
+            { id: 'beggar', name: '乞丐', desc: '免疫「抢劫」和「纵火」' }
+        ];
+
+        const DECK_TEMPLATE = [
+            { name: '指控', count: 35, type: CardType.RED, icon: Gavel, desc: '放置1个指控标记' },
+            { name: '证据', count: 5, type: CardType.RED, icon: Search, desc: '放置3个指控标记' },
+            { name: '目击', count: 1, type: CardType.RED, icon: Eye, desc: '放置7个指控标记' },
+            { name: '嫁祸', count: 2, type: CardType.GREEN, icon: Users, desc: '转移指控' },
+            { name: '抢劫', count: 1, type: CardType.GREEN, icon: Zap, desc: '抢夺一张手牌' },
+            { name: '纵火', count: 1, type: CardType.GREEN, icon: Zap, desc: '弃置一名玩家手牌' },
+            { name: '诅咒', count: 1, type: CardType.GREEN, icon: Skull, desc: '弃置一张蓝色卡牌' },
+            { name: '拘留', count: 3, type: CardType.GREEN, icon: Lock, desc: '失去下一回合' }, 
+            { name: '辩护', count: 3, type: CardType.GREEN, icon: Shield, desc: '移除指控' },
+            { name: '黑猫', count: 1, type: CardType.BLUE, icon: Cat, desc: '先手行动' },
+            { name: '情侣', count: 2, type: CardType.BLUE, icon: Heart, desc: '生死与共' }, 
+            { name: '避难', count: 1, type: CardType.BLUE, icon: Home, desc: '免疫指控' }, 
+            { name: '信徒', count: 1, type: CardType.BLUE, icon: Users, desc: '死后收益' }, 
+            { name: '传染', count: 1, type: CardType.BLACK, icon: Users, desc: '身份轮转' },
+            { name: '黑夜', count: 1, type: CardType.BLACK, icon: Moon, desc: '天黑了' }
+        ];
+
+        const generateDeck = () => {
+            let deck = [];
+            let idCounter = 1;
+            DECK_TEMPLATE.forEach(template => {
+                for (let i = 0; i < template.count; i++) {
+                    deck.push({
+                        id: `card-${idCounter++}`,
+                        name: template.name,
+                        type: template.type,
+                        icon: template.icon,
+                        description: template.desc
                     });
-                    
-                    // 如果是移动端，点击后关闭菜单
-                    const mobileMenu = document.getElementById('mobile-menu');
-                    if (!mobileMenu.classList.contains('hidden')) {
-                        mobileMenu.classList.add('hidden');
-                    }
                 }
             });
-        });
+            return deck;
+        };
+
+        const shuffle = (array) => {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        };
+
+        const getLivingLeftNeighbor = (playerId, allPlayers) => {
+            if (!allPlayers || allPlayers.length === 0) return 0;
+            let checkId = (playerId - 1 + allPlayers.length) % allPlayers.length;
+            let safety = 0;
+            while (allPlayers[checkId] && allPlayers[checkId].isDead && safety < allPlayers.length) {
+                checkId = (checkId - 1 + allPlayers.length) % allPlayers.length;
+                safety++;
+            }
+            return checkId;
+        };
+
+        const getLivingRightNeighbor = (playerId, allPlayers) => {
+            if (!allPlayers || allPlayers.length === 0) return 0;
+            let checkId = (playerId + 1) % allPlayers.length;
+            let safety = 0;
+            while (allPlayers[checkId] && allPlayers[checkId].isDead && safety < allPlayers.length) {
+                checkId = (checkId + 1) % allPlayers.length;
+                safety++;
+            }
+            return checkId;
+        };
+
+        const getEffectiveRole = (player, allPlayers) => {
+            if (!player || player.isDead) return { id: 'unknown', name: '未知' };
+            if (player.character.id !== 'tailor') return player.character;
+            
+            const neighborIndex = getLivingRightNeighbor(player.id, allPlayers);
+            const neighbor = allPlayers[neighborIndex];
+            if (neighbor.character.id === 'tailor') return { id: 'tailor', name: '裁缝', desc: '复制右侧玩家技能' };
+            return neighbor ? neighbor.character : player.character;
+        };
+
+        // --- Components ---
+
+        const AvatarImage = ({ charId, alt, className }) => {
+            const [src, setSrc] = useState(`./assets/avatars/${charId}.png`);
+            
+            useEffect(() => {
+                setSrc(`./assets/avatars/${charId}.png`);
+            }, [charId]);
+
+            const handleError = () => {
+                if (src.endsWith('.png')) {
+                    setSrc(`./assets/avatars/${charId}.jpg`);
+                } 
+                else if (!src.includes('dicebear')) {
+                    setSrc(`https://api.dicebear.com/7.x/avataaars/svg?seed=${charId}&backgroundColor=292524`); // Dark BG for avatar fallback
+                }
+            };
+
+            return (
+                <img 
+                    src={src} 
+                    alt={alt} 
+                    className={className}
+                    onError={handleError}
+                />
+            );
+        };
+
+        const IdentitySelectionModal = ({ player, onClose, onSelect }) => {
+            if (!player) return null;
+
+            return (
+                <div className="fixed inset-0 z-[300] bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-[#292524] p-6 rounded-lg shadow-2xl max-w-lg w-full border-2 border-[#78350f] relative">
+                        <button onClick={onClose} className="absolute top-2 right-2 text-[#a8a29e] hover:text-white hover:bg-[#1c1917] rounded-full p-1">
+                            <X />
+                        </button>
+                        <h3 className="text-xl font-serif font-bold text-center mb-6 text-[#e7e5e4]">
+                            翻开 {player.character.name} 的身份
+                        </h3>
+                        <div className="flex justify-center gap-4 flex-wrap">
+                            {player.identityCards.map((card, idx) => (
+                                <div 
+                                    key={idx}
+                                    onClick={() => {
+                                        if (!card.isRevealed) onSelect(idx);
+                                    }}
+                                    className={`
+                                        w-20 h-28 rounded-lg border-4 flex items-center justify-center transition-all shadow-lg
+                                        ${card.isRevealed 
+                                            ? 'bg-[#44403c] border-[#1c1917] cursor-default' 
+                                            : 'bg-[#1c1917] border-[#78350f] hover:scale-105 cursor-pointer hover:ring-4 ring-amber-500/50'
+                                        }
+                                    `}
+                                >
+                                    {card.isRevealed ? (
+                                        <span className="text-lg font-bold text-[#a8a29e]">
+                                            {card.identity === Identity.WITCH ? '女巫' : card.identity === Identity.CONSTABLE ? '警长' : '平民'}
+                                        </span>
+                                    ) : (
+                                        <span className="text-4xl font-bold text-[#78350f] opacity-50">?</span>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                        <p className="text-center mt-6 text-[#a8a29e] text-xs italic font-serif">
+                            点击一张背面朝上的卡牌以揭示身份
+                        </p>
+                    </div>
+                </div>
+            );
+        };
+
+        const Card = ({ card, isSelected, onClick, disabled, small }) => {
+            const getCardStyle = (type) => {
+                switch (type) {
+                    case CardType.RED: return 'bg-[#7f1d1d] border-[#450a0a] text-[#fecaca]';
+                    case CardType.BLUE: return 'bg-[#1e3a8a] border-[#172554] text-[#bfdbfe]';
+                    case CardType.GREEN: return 'bg-[#14532d] border-[#052e16] text-[#bbf7d0]';
+                    case CardType.BLACK: return 'bg-[#000000] border-[#292524] text-[#a8a29e]';
+                    case CardType.TRIAL: return 'bg-[#44403c] border-[#292524] text-[#d6d3d1]';
+                    default: return 'bg-[#44403c] border-[#292524] text-[#d6d3d1]';
+                }
+            };
+
+            const renderCardContent = () => {
+                if (card.name === '指控') return <span className="text-4xl font-bold text-[#ef4444]/80">✕</span>;
+                if (card.name === '证据') return <div className="flex gap-0.5 text-[#ef4444]/80"><span className="text-xl font-bold">✕</span><span className="text-xl font-bold">✕</span><span className="text-xl font-bold">✕</span></div>;
+                if (card.name === '目击') return (
+                    <div className="grid grid-cols-4 gap-x-1 gap-y-0 leading-none text-[#ef4444]/80">
+                        {[...Array(7)].map((_, i) => <span key={i} className="text-[10px] font-bold">✕</span>)}
+                    </div>
+                );
+                if (card.name === '黑猫') return <Cat className={small ? 'w-6 h-6' : 'w-10 h-10'} />;
+
+                const Icon = card.icon;
+                return <Icon className={small ? 'w-6 h-6' : 'w-8 h-8'} />;
+            };
+
+            return (
+                <div 
+                    onClick={() => !disabled && onClick && onClick(card)}
+                    className={`
+                        relative border-[3px] rounded-lg flex flex-col items-center justify-center
+                        transition-all duration-200 cursor-pointer card-shadow select-none
+                        ${small ? 'w-12 h-16 text-[8px]' : 'w-20 h-28 md:w-24 md:h-32 text-xs'}
+                        ${isSelected ? 'ring-4 ring-amber-600 transform -translate-y-4 z-10' : ''}
+                        ${disabled ? 'opacity-60 grayscale cursor-not-allowed' : 'hover:-translate-y-2 hover:shadow-xl hover:border-white/20'}
+                        ${getCardStyle(card.type)}
+                    `}
+                >
+                    {renderCardContent()}
+                    <div className="text-center font-bold mt-1 leading-tight px-1 tracking-widest font-serif">
+                        {card.name}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- PLAYER AVATAR ---
+        const PlayerAvatar = ({ 
+            player, myPlayerId, allPlayers, currentPlayerId, isActive, 
+            blackCatHolderId, protectionTargetId, isTargetable, onSelect, lastWitchVotes, isMe,
+            revealMode, girlTrialMode, playerName
+        }) => {
+            const hasBlackCat = blackCatHolderId === player.id;
+            const isProtected = protectionTargetId === player.id;
+            const hasMatchmaker = player.blueCards.some(c => c.name === '情侣');
+            const hasAsylum = player.blueCards.some(c => c.name === '避难');
+            const hasAlibi = player.blueCards.some(c => c.name === '信徒'); 
+
+            const myPlayer = allPlayers[myPlayerId];
+            const amWitch = myPlayer && myPlayer.identityCards.some(c => c.identity === Identity.WITCH);
+            const isTeammate = amWitch && player.identityCards.some(c => c.identity === Identity.WITCH) && player.id !== myPlayerId;
+
+            const effectiveRole = getEffectiveRole(player, allPlayers);
+
+            const sizeClass = "w-20 md:w-24";
+            const isRevealTarget = revealMode && isTargetable; 
+            const isGirlTarget = girlTrialMode && !player.isDead && player.id !== myPlayerId;
+
+            return (
+                <div 
+                    onClick={() => (isTargetable || isGirlTarget) && onSelect()} 
+                    className={`
+                        relative flex flex-col
+                        ${sizeClass}
+                        transition-all duration-300 
+                        rounded-xl border-[3px] select-none overflow-hidden shadow-lg
+                        ${player.isDead ? 'opacity-60 grayscale sepia border-stone-700' : 'bg-[#1c1917]'}
+                        ${isActive ? 'ring-4 ring-amber-700 scale-105 z-20' : ''}
+                        ${(!isRevealTarget && isTargetable) ? 'cursor-pointer ring-4 ring-red-900 animate-pulse scale-105' : ''}
+                        ${isRevealTarget ? 'cursor-pointer ring-4 ring-yellow-600 z-30 scale-105' : ''} 
+                        ${isGirlTarget ? 'cursor-pointer ring-4 ring-red-700 animate-pulse scale-105' : ''}
+                        ${isTeammate ? 'border-purple-900 shadow-[0_0_10px_rgba(107,33,168,0.5)]' : 'border-[#44403c]'}
+                        ${isMe ? 'border-amber-800 shadow-[0_0_15px_rgba(180,83,9,0.2)]' : ''}
+                    `}
+                >
+                    {/* Role Title Header */}
+                    <div className={`w-full bg-[#292524] text-center py-0.5 text-[#a8a29e] font-bold truncate px-1 border-b border-[#44403c] text-[10px] font-serif tracking-wide`}>
+                        {effectiveRole.name}
+                    </div>
+
+                    {/* Main Avatar Area */}
+                    <div className="relative w-full aspect-square bg-[#1c1917] group">
+                        <AvatarImage 
+                            charId={player.character.id}
+                            alt={player.character.name}
+                            className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity"
+                        />
+                        
+                        {/* Role Desc Tooltip */}
+                        <div className="absolute inset-0 bg-black/95 text-[#e7e5e4] text-[10px] p-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-center z-30 pointer-events-none font-serif border border-[#78350f]">
+                            {effectiveRole.desc}
+                        </div>
+                        
+                        {/* Player Name Overlay */}
+                        {player.name && (
+                             <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-[#e7e5e4] text-[8px] text-center truncate px-1 py-0.5">
+                                 {player.name}
+                             </div>
+                        )}
+
+                        {isTeammate && !player.isDead && (
+                            <div className="absolute top-1 left-1/2 -translate-x-1/2 bg-purple-900 text-purple-100 text-[8px] px-1 rounded shadow-sm border border-purple-500">
+                                巫
+                            </div>
+                        )}
+
+                        {!isMe && !player.isDead && (
+                            <div className="absolute top-0.5 left-0.5 bg-black/80 rounded px-1 py-0.5 flex items-center gap-0.5 border border-[#44403c] shadow-sm">
+                                <div className="w-2 h-3 bg-[#57534e] rounded-[1px] border border-[#a8a29e]"></div>
+                                <span className="text-[10px] font-bold text-white">{player.hand.length}</span>
+                            </div>
+                        )}
+
+                        <div className="absolute top-0.5 right-0.5 flex flex-col gap-0.5 items-end">
+                            {hasBlackCat && (
+                                <div className="w-5 h-5 rounded-full bg-[#2e1065] border border-purple-400 flex items-center justify-center shadow-[0_0_15px_#a855f7] z-20">
+                                    <Cat className="w-3 h-3 text-purple-200" />
+                                </div>
+                            )}
+                            {isProtected && (
+                                <div className="w-5 h-5 rounded-full bg-[#1e3a8a] border border-blue-300 flex items-center justify-center shadow-md z-20">
+                                    <Shield className="w-3 h-3 text-blue-200" />
+                                </div>
+                            )}
+                            {hasMatchmaker && (
+                                <div className="w-5 h-5 rounded-full bg-[#831843] border border-pink-300 flex items-center justify-center shadow-md">
+                                    <Heart className="w-3 h-3 text-pink-200" />
+                                </div>
+                            )}
+                            {hasAsylum && (
+                                <div className="w-5 h-5 rounded-full bg-[#14532d] border border-green-300 flex items-center justify-center shadow-md">
+                                    <Home className="w-3 h-3 text-green-200" />
+                                </div>
+                            )}
+                            {hasAlibi && (
+                                <div className="w-5 h-5 rounded-full bg-[#134e4a] border border-teal-300 flex items-center justify-center shadow-md">
+                                    <Users className="w-3 h-3 text-teal-200" />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Accusation Bar */}
+                    <div className="w-full min-h-[16px] flex flex-wrap justify-center items-center bg-[#292524] border-t border-b border-[#44403c] px-0.5 py-0.5">
+                        {Array.from({ length: player.accusations }).map((_, i) => (
+                            <span key={i} className="text-[10px] text-[#dc2626] font-bold leading-none mx-[1px]">✕</span>
+                        ))}
+                    </div>
+
+                    {/* Identity Cards Row */}
+                    <div className="w-full flex justify-center gap-0.5 p-1 bg-[#1c1917] border-t border-[#44403c] h-8 items-center">
+                        {player.identityCards.map((card, idx) => {
+                            const identityLabel = card.identity === Identity.WITCH ? '巫' : card.identity === Identity.CONSTABLE ? '警' : '民';
+                            
+                            let content = '?';
+                            let styleClass = 'bg-[#0c0a09] text-[#57534e] border-[#292524]'; // Default Unknown Dark
+
+                            if (player.id === myPlayerId) {
+                                if (card.isRevealed) {
+                                    content = '✕';
+                                    styleClass = 'bg-[#450a0a] text-red-500 border-red-900'; 
+                                } else {
+                                    content = identityLabel;
+                                    if (card.identity === Identity.WITCH) styleClass = 'bg-[#581c87] text-purple-200 border-purple-900';
+                                    else if (card.identity === Identity.CONSTABLE) styleClass = 'bg-[#1e3a8a] text-blue-200 border-blue-900';
+                                    else styleClass = 'bg-[#14532d] text-green-200 border-green-900';
+                                }
+                            } else {
+                                if (card.isRevealed) {
+                                    content = identityLabel;
+                                    if (card.identity === Identity.WITCH) styleClass = 'bg-[#581c87] text-purple-200 border-purple-900';
+                                    else if (card.identity === Identity.CONSTABLE) styleClass = 'bg-[#1e3a8a] text-blue-200 border-blue-900';
+                                    else styleClass = 'bg-[#14532d] text-green-200 border-green-900';
+                                } else {
+                                    content = '?';
+                                    styleClass = 'bg-[#0c0a09] text-[#57534e] border-[#292524]';
+                                }
+                            }
+
+                            return (
+                                <div 
+                                    key={idx}
+                                    className={`
+                                        w-4 h-6 rounded-[2px] border text-[10px] flex items-center justify-center leading-none font-bold font-serif
+                                        ${styleClass}
+                                    `}
+                                >
+                                    {content}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        };
+
+        const SalemGame = () => {
+            // Meta State
+            const [view, setView] = useState(View.LANDING);
+            const [myDisplayName, setMyDisplayName] = useState(""); // Player Name
+
+            // Network State
+            const [peer, setPeer] = useState(null);
+            const [roomId, setRoomId] = useState(""); // Host's Peer ID
+            const [myPeerId, setMyPeerId] = useState("");
+            const [isHost, setIsHost] = useState(false);
+            const [connections, setConnections] = useState([]); // For Host: List of connections
+            const [connectedPlayers, setConnectedPlayers] = useState([]); // List of { peerId, name, isReady }
+            const [hostConn, setHostConn] = useState(null); // For Guest: Connection to Host
+
+            // Setup State
+            const [playerCount, setPlayerCount] = useState(7);
+            const [charChoices, setCharChoices] = useState([]);
+            const [availablePool, setAvailablePool] = useState([]); // Store characters NOT offered to human
+            const [takenCharacters, setTakenCharacters] = useState([]); // List of IDs
+            
+            // Game State (Synced)
+            const [phase, setPhase] = useState(Phase.INITIAL_NIGHT);
+            const [players, setPlayers] = useState([]);
+            const [deck, setDeck] = useState([]);
+            const [discardPile, setDiscardPile] = useState([]);
+            const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
+            const [myPlayerId, setMyPlayerId] = useState(0);
+            const [turnTimer, setTurnTimer] = useState(35);
+            
+            // Local UI State
+            const [selectedCardIds, setSelectedCardIds] = useState([]);
+            const [systemMessage, setSystemMessage] = useState(null);
+            const [hasPlayedCard, setHasPlayedCard] = useState(false);
+            const [trialTargetId, setTrialTargetId] = useState(null); 
+            const [identitySelectionTargetId, setIdentitySelectionTargetId] = useState(null);
+            const [girlTrialMode, setGirlTrialMode] = useState(false);
+            
+            // Night/Voting State
+            const [witchVotes, setWitchVotes] = useState({});
+            const [witchDisagreementCount, setWitchDisagreementCount] = useState(0);
+            const [lastWitchVotes, setLastWitchVotes] = useState(null); 
+            const [protectionTargetId, setProtectionTargetId] = useState(null);
+            const [visibleProtectionTargetId, setVisibleProtectionTargetId] = useState(null);
+
+            // Derived State
+            const blackCatHolderId = players.find(p => p.blueCards.some(c => c.name === '黑猫'))?.id ?? null;
+
+            // Refs
+            const toastTimeoutRef = useRef(null);
+
+            // --- Toast Logic ---
+            const showToast = (msg, duration = 4000) => {
+                if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+                setSystemMessage(msg);
+                toastTimeoutRef.current = setTimeout(() => setSystemMessage(null), duration);
+            };
+
+            // --- Networking Logic ---
+
+            // Initialize Peer on Lobby Entrance or demand
+            const initPeer = () => {
+                if (peer) return peer;
+                const newPeer = new window.Peer(null, { debug: 2 });
+                newPeer.on('open', (id) => {
+                    setMyPeerId(id);
+                });
+                newPeer.on('error', (err) => {
+                    console.error("Peer Error:", err);
+                    showToast("网络连接错误: " + err.type);
+                });
+                setPeer(newPeer);
+                return newPeer;
+            };
+
+            const hostRoom = () => {
+                if (!myDisplayName.trim()) { showToast("请输入你的名字"); return; }
+                const p = initPeer();
+                setIsHost(true);
+                
+                p.on('open', (id) => {
+                    setRoomId(id);
+                    setConnectedPlayers([{ peerId: id, name: myDisplayName, isReady: true, isHost: true }]);
+                    setView(View.WAITING_ROOM);
+                });
+
+                p.on('connection', (conn) => {
+                    conn.on('data', (data) => handleHostData(data, conn));
+                    conn.on('open', () => {
+                         setConnections(prev => [...prev, conn]);
+                    });
+                });
+            };
+
+            const joinRoom = () => {
+                if (!myDisplayName.trim()) { showToast("请输入你的名字"); return; }
+                if (!roomId.trim()) { showToast("请输入房间号"); return; }
+                
+                const p = initPeer();
+                setIsHost(false);
+                
+                p.on('open', (id) => {
+                    const conn = p.connect(roomId);
+                    conn.on('open', () => {
+                        setHostConn(conn);
+                        conn.send({ type: 'JOIN', name: myDisplayName });
+                        setView(View.WAITING_ROOM);
+                    });
+                    conn.on('data', (data) => handleGuestData(data));
+                    conn.on('close', () => { showToast("与房主断开连接"); setView(View.LANDING); });
+                    conn.on('error', () => { showToast("连接失败"); });
+                });
+            };
+
+            // HOST: Handle incoming data
+            const handleHostData = (data, conn) => {
+                switch(data.type) {
+                    case 'JOIN':
+                        const newPlayer = { peerId: conn.peer, name: data.name, isReady: false, isHost: false };
+                        setConnectedPlayers(prev => {
+                            const updated = [...prev, newPlayer];
+                            broadcastToAll(connections, { type: 'ROOM_UPDATE', players: updated });
+                            return updated;
+                        });
+                        break;
+                    case 'READY_TOGGLE':
+                        setConnectedPlayers(prev => {
+                            const updated = prev.map(p => p.peerId === conn.peer ? { ...p, isReady: data.isReady } : p);
+                            broadcastToAll(connections, { type: 'ROOM_UPDATE', players: updated });
+                            return updated;
+                        });
+                        break;
+                    case 'GAME_ACTION':
+                        console.log("Host received action:", data.action);
+                        break;
+                    case 'CHAR_SELECT':
+                        if (takenCharacters.includes(data.charId)) {
+                             conn.send({ type: 'ERROR', msg: '该角色已被选择' });
+                        } else {
+                             setTakenCharacters(prev => [...prev, data.charId]);
+                             broadcastToAll(connections, { type: 'TAKEN_CHARS_UPDATE', taken: [...takenCharacters, data.charId] });
+                        }
+                        break;
+                }
+            };
+
+            // GUEST: Handle incoming data
+            const handleGuestData = (data) => {
+                switch(data.type) {
+                    case 'ROOM_UPDATE':
+                        setConnectedPlayers(data.players);
+                        break;
+                    case 'START_GAME_SETUP':
+                        setPlayerCount(data.playerCount);
+                        setView(View.CHAR_SELECT);
+                        break;
+                    case 'GAME_STATE_UPDATE':
+                        if(data.state.players) setPlayers(data.state.players);
+                        if(data.state.phase) setPhase(data.state.phase);
+                        break;
+                    case 'TAKEN_CHARS_UPDATE':
+                        setTakenCharacters(data.taken);
+                        break;
+                }
+            };
+
+            const broadcastToAll = (conns, msg) => {
+                conns.forEach(c => {
+                    if(c.open) c.send(msg);
+                });
+            };
+
+            // --- Initialization Logic ---
+            const startSetupHost = () => {
+                setView(View.SETUP_HOST);
+            };
+
+            const enterWaitingRoom = () => {
+                if (isHost) hostRoom();
+                else joinRoom();
+            };
+
+            const launchGameSetup = () => {
+                if (isHost) {
+                    broadcastToAll(connections, { type: 'START_GAME_SETUP', playerCount });
+                    setView(View.CHAR_SELECT);
+                }
+            };
+
+            const confirmSetup = () => {
+                const shuffled = shuffle([...CHARACTERS]);
+                let choices = [];
+                const available = shuffled.filter(c => !takenCharacters.includes(c.id));
+
+                if (playerCount < 7) {
+                    choices = available.slice(0, 2);
+                } else {
+                    choices = available.slice(0, 1);
+                }
+                
+                setCharChoices(choices);
+                setView(View.CHAR_SELECT);
+            };
+
+            const getDeckComposition = (count) => {
+                let villagers, witches, constable = 1;
+                if (count >= 4 && count <= 7) {
+                     witches = count >= 6 ? 2 : 1;
+                     villagers = (count * 5) - witches - constable;
+                } else if (count === 8) { villagers = 29; witches = 2; }
+                else if (count === 9) { villagers = 33; witches = 2; }
+                else if (count === 10) { villagers = 27; witches = 2; }
+                else if (count === 11) { villagers = 30; witches = 2; }
+                else if (count === 12) { villagers = 33; witches = 2; }
+                
+                const total = villagers + witches + constable;
+                return { villagers, witches, constable, total, cardsPerPlayer: Math.floor(total / count) };
+            };
+
+            const initGame = (chosenCharId) => {
+                if (!isHost && hostConn) {
+                    hostConn.send({ type: 'CHAR_SELECT', charId: chosenCharId });
+                }
+                setTakenCharacters(prev => [...prev, chosenCharId]);
+
+                const comp = getDeckComposition(playerCount);
+                let identityDeck = [];
+                for (let i = 0; i < comp.constable; i++) identityDeck.push({ identity: Identity.CONSTABLE, isRevealed: false });
+                for (let i = 0; i < comp.witches; i++) identityDeck.push({ identity: Identity.WITCH, isRevealed: false });
+                for (let i = 0; i < comp.villagers; i++) identityDeck.push({ identity: Identity.VILLAGER, isRevealed: false });
+                identityDeck = shuffle(identityDeck);
+
+                let availableChars = CHARACTERS.filter(c => c.id !== chosenCharId && !takenCharacters.includes(c.id));
+                availableChars = shuffle(availableChars);
+                
+                const newPlayers = [];
+                const humanChar = CHARACTERS.find(c => c.id === chosenCharId);
+
+                for (let i = 0; i < playerCount; i++) {
+                    const char = i === 0 ? humanChar : availableChars.pop();
+                    const idCards = identityDeck.splice(0, comp.cardsPerPlayer);
+                    
+                    newPlayers.push({
+                        id: i,
+                        name: i === 0 ? myDisplayName : (i < connectedPlayers.length ? connectedPlayers[i].name : `电脑 ${i}`),
+                        isHuman: i === 0 || (isHost && i < connectedPlayers.length), 
+                        character: char,
+                        hand: [],
+                        blueCards: [],
+                        identityCards: idCards,
+                        accusations: 0,
+                        isDead: false,
+                        priestUsedCount: 0,
+                        storytellerUsed: false,
+                        officialSkillUsed: false 
+                    });
+                }
+
+                const fullDeck = generateDeck();
+                const blackCards = fullDeck.filter(c => c.type === CardType.BLACK);
+                let playDeck = fullDeck.filter(c => c.type !== CardType.BLACK && c.name !== '黑猫');
+                playDeck = shuffle(playDeck);
+
+                newPlayers.forEach(p => {
+                    for(let k=0; k<3; k++) {
+                        if (playDeck.length > 0) p.hand.push(playDeck.pop());
+                    }
+                });
+
+                const conspiracy = blackCards.find(c => c.name === '传染');
+                const night = blackCards.find(c => c.name === '黑夜');
+                
+                if (conspiracy) playDeck.push(conspiracy);
+                playDeck = shuffle(playDeck);
+                
+                if (night) playDeck.unshift(night); 
+
+                setPlayers(newPlayers);
+                setDeck(playDeck);
+                setPhase(Phase.INITIAL_NIGHT);
+                setMyPlayerId(0);
+                setCurrentPlayerIndex(0); 
+                setWitchVotes({});
+                setView(View.GAME);
+                
+                const myIdentities = newPlayers[0].identityCards;
+                const isWitch = myIdentities.some(c => c.identity === Identity.WITCH);
+                if (isWitch) showToast('天黑了... 你是女巫! 请放置黑猫。', 5000);
+                else if (myIdentities.some(c => c.identity === Identity.CONSTABLE)) showToast('天黑了... 你是警长! 女巫正在行动。', 5000);
+                else showToast('天黑了... 你是平民。女巫正在行动。', 5000);
+            };
+
+            // --- Helper for Girl Skill ---
+            const getHandAccusationTotal = (hand, isDoctor) => {
+                let total = 0;
+                hand.forEach(c => {
+                    if (c.name === '目击') total += 7;
+                    else if (c.name === '证据') total += 3;
+                    else if (c.name === '指控') total += 1;
+                    else if (c.name === '辩护' && isDoctor) total += 7;
+                });
+                return total;
+            };
+
+            // --- Main Loop Effects ---
+            useEffect(() => {
+                if (view !== View.GAME) return;
+                
+                if (phase !== Phase.DAY_TURN) return;
+                if (!players || players.length === 0) return; 
+                const timer = setInterval(() => {
+                    setTurnTimer(prev => {
+                        if (prev <= 1) {
+                            clearInterval(timer);
+                            handleTurnTimeout();
+                            return 0;
+                        }
+                        return prev - 1;
+                    });
+                }, 1000);
+                return () => clearInterval(timer);
+            }, [phase, currentPlayerIndex, players, view]);
+
+            const handleTurnTimeout = () => {
+                if (players.length === 0) return;
+                const currentPlayer = players[currentPlayerIndex];
+                if (!currentPlayer) return;
+
+                if (currentPlayer.hand.some(c => c.type === CardType.BLACK)) {
+                    const blackCard = currentPlayer.hand.find(c => c.type === CardType.BLACK);
+                    handlePlayCard(blackCard);
+                } else {
+                    handleDrawCards(2, false, true); 
+                }
+            };
+            
+            useEffect(() => {
+                if (view !== View.GAME) return;
+                if (phase === Phase.GAME_OVER) return;
+                if (!players || players.length === 0) return; 
+                
+                const currentPlayer = players[currentPlayerIndex];
+                if (!currentPlayer && phase !== Phase.INITIAL_NIGHT) return; 
+                
+                if (phase === Phase.DAY_TURN && currentPlayer && currentPlayer.isDead) {
+                     const newPlayers = [...players];
+                     endTurn(newPlayers);
+                     return;
+                }
+
+                if (phase === Phase.INITIAL_NIGHT) {
+                    const humanWitch = players[0].identityCards.some(c => c.identity === Identity.WITCH);
+                    const witchPlayers = players.filter(p => p.identityCards.some(c => c.identity === Identity.WITCH));
+                    const aiWitches = witchPlayers.filter(p => !p.isHuman);
+                    
+                    aiWitches.forEach(ai => {
+                         if (!witchVotes[ai.id]) {
+                             let validTargets = players.map(p => p.id).filter(id => getEffectiveRole(players[id], players).id !== 'maid');
+                             const choice = validTargets[Math.floor(Math.random() * validTargets.length)];
+                             setTimeout(() => {
+                                 castWitchVote(ai.id, choice);
+                             }, Math.random() * 2000 + 1000);
+                         }
+                    });
+
+                    if (!humanWitch) {
+                         const allAiVoted = aiWitches.every(w => witchVotes[w.id] !== undefined);
+                         if (allAiVoted) {
+                              checkWitchConsensus();
+                         }
+                    }
+                    return;
+                }
+
+                if (phase === Phase.DAY_TURN && !currentPlayer.isHuman) {
+                    const timer = setTimeout(() => {
+                        if (phase !== Phase.DAY_TURN || currentPlayerIndex !== currentPlayer.id) return;
+
+                        const cp = players[currentPlayerIndex];
+                        const newPlayers = [...players];
+                        const p = newPlayers[currentPlayerIndex];
+
+                        const blackCard = p.hand.find(c => c.type === CardType.BLACK);
+                        if (blackCard) {
+                            handlePlayCard(blackCard);
+                            return;
+                        }
+
+                        let attackCards = p.hand.filter(c => ['证据', '目击', '指控'].includes(c.name));
+                        
+                        const effectiveRole = getEffectiveRole(p, newPlayers);
+                        if (effectiveRole.id === 'doctor') {
+                             const defenseCards = p.hand.filter(c => c.name === '辩护');
+                             attackCards = [...attackCards, ...defenseCards];
+                        }
+
+                        if (attackCards.length > 0 && !hasPlayedCard) {
+                            const cardToPlay = attackCards[Math.floor(Math.random() * attackCards.length)];
+                            const validTargets = newPlayers.filter(target => !target.isDead && target.id !== p.id);
+                            
+                            if (validTargets.length > 0) {
+                                const target = validTargets[Math.floor(Math.random() * validTargets.length)];
+                                let amount = 1;
+                                if (cardToPlay.name === '目击') amount = 7;
+                                else if (cardToPlay.name === '证据') amount = 3;
+                                else if (cardToPlay.name === '辩护' && effectiveRole.id === 'doctor') amount = 7;
+
+                                const targetRole = getEffectiveRole(target, newPlayers);
+                                if (targetRole.id === 'minister' && cardToPlay.name === '证据') amount = 1;
+
+                                const asylum = target.blueCards.find(c => c.name === '避难');
+                                if (!asylum) {
+                                    target.accusations += amount;
+                                    
+                                    let threshold = 7;
+                                    if (effectiveRole.id === 'judge') threshold = 6;
+                                    if (targetRole.id === 'strongman') threshold = 8;
+
+                                    const cardIndex = p.hand.findIndex(c => c.id === cardToPlay.id);
+                                    if (cardIndex > -1) p.hand.splice(cardIndex, 1);
+                                    setDiscardPile(prev => [...prev, cardToPlay]);
+                                    
+                                    if (target.accusations >= threshold) {
+                                        setPlayers(newPlayers);
+                                        showToast(`${p.character.name} 对 ${target.character.name} 使用了 ${cardToPlay.name}, 发起审判!`);
+                                        setTimeout(() => {
+                                            initiateTrial(target.id);
+                                        }, 1000);
+                                    } else {
+                                        setPlayers(newPlayers);
+                                        showToast(`${p.character.name} 对 ${target.character.name} 使用了 ${cardToPlay.name}`);
+                                        endTurn(newPlayers);
+                                    }
+                                } else {
+                                     const cardIndex = p.hand.findIndex(c => c.id === cardToPlay.id);
+                                     if (cardIndex > -1) p.hand.splice(cardIndex, 1);
+                                     setDiscardPile(prev => [...prev, cardToPlay]);
+                                     setPlayers(newPlayers);
+                                     showToast(`${target.character.name} 拥有避难所!`);
+                                     endTurn(newPlayers);
+                                }
+                                return;
+                            }
+                        }
+                        handleDrawCards(2, false, true);
+
+                    }, 1500); 
+                    return () => clearTimeout(timer);
+                }
+
+                if (phase === Phase.NIGHT_WITCH) {
+                    const humanIsWitch = players[0].identityCards.some(c => c.identity === Identity.WITCH);
+                    if (!humanIsWitch) {
+                        const timer = setTimeout(() => {
+                           const target = Math.floor(Math.random() * players.length);
+                           setLastWitchVotes({[99]: target}); 
+                           handleNightAction('WITCH', target); 
+                        }, 2500);
+                        return () => clearTimeout(timer);
+                    }
+                }
+
+                if (phase === Phase.NIGHT_CONSTABLE) {
+                     const humanIsConstable = players[0].identityCards.some(c => c.identity === Identity.CONSTABLE && !c.isRevealed);
+                     if (!humanIsConstable) {
+                         const timer = setTimeout(() => {
+                             const target = Math.floor(Math.random() * players.length);
+                             handleNightAction('CONSTABLE', target); 
+                         }, 2500);
+                         return () => clearTimeout(timer);
+                     }
+                }
+                
+                if (phase === Phase.TRIAL_REVEAL && !currentPlayer.isHuman) {
+                    const timer = setTimeout(() => {
+                        const target = players[trialTargetId];
+                        if (!target) { setPhase(Phase.DAY_TURN); return; }
+                        const unrevealed = target.identityCards.map((c, i) => (!c.isRevealed ? i : -1)).filter(i => i !== -1);
+                        if (unrevealed.length > 0) {
+                            const randomIdx = unrevealed[Math.floor(Math.random() * unrevealed.length)];
+                            handleIdentityCardClick(trialTargetId, randomIdx);
+                        } else {
+                            setPhase(Phase.DAY_TURN);
+                        }
+                    }, 2000);
+                    return () => clearTimeout(timer);
+                }
+                
+                if (phase === Phase.RESOLVE_CONSPIRACY_REVEAL && !currentPlayer.isHuman) {
+                    const timer = setTimeout(() => {
+                        if (!players[blackCatHolderId] || players[blackCatHolderId].isDead) {
+                             setPhase(Phase.RESOLVE_CONSPIRACY_ROTATION);
+                             return;
+                        }
+                        const holder = players[blackCatHolderId];
+                        const unrevealed = holder.identityCards.map((c, i) => (!c.isRevealed ? i : -1)).filter(i => i !== -1);
+                        if (unrevealed.length > 0) {
+                            const choice = unrevealed[Math.floor(Math.random() * unrevealed.length)];
+                            handleIdentityCardClick(blackCatHolderId, choice);
+                        } else {
+                            setPhase(Phase.RESOLVE_CONSPIRACY_ROTATION);
+                        }
+                    }, 2000);
+                    return () => clearTimeout(timer);
+                }
+
+            }, [phase, currentPlayerIndex, players, turnTimer, hasPlayedCard, blackCatHolderId, view, witchVotes, trialTargetId]);
+
+            const finishAiCardPlay = (card) => {
+                const newPlayers = [...players];
+                const cp = newPlayers[currentPlayerIndex];
+                const cardIndex = cp.hand.findIndex(c => c.id === card.id);
+                if (cardIndex > -1) {
+                    cp.hand.splice(cardIndex, 1);
+                }
+                const newDiscard = [...discardPile, card];
+                setPlayers(newPlayers);
+                setDiscardPile(newDiscard);
+                endTurn(newPlayers);
+            };
+
+            // --- Actions ---
+            
+            const castWitchVote = (voterId, targetId) => {
+                setWitchVotes(prev => {
+                    const newVotes = {...prev, [voterId]: targetId};
+                    const witchPlayers = players.filter(p => p.identityCards.some(c => c.identity === Identity.WITCH));
+                    if (Object.keys(newVotes).length === witchPlayers.length) {
+                    }
+                    return newVotes;
+                });
+            };
+
+            const checkWitchConsensus = () => {
+                const witchPlayers = players.filter(p => p.identityCards.some(c => c.identity === Identity.WITCH));
+                const currentVotes = witchVotes;
+                
+                if (Object.keys(currentVotes).length < witchPlayers.length) return;
+
+                const targets = Object.values(currentVotes);
+                const firstTarget = targets[0];
+                const isConsensus = targets.every(t => t === firstTarget);
+
+                if (isConsensus) {
+                    handleInitialBlackCatPlacement(firstTarget);
+                } else {
+                    showToast("意见不统一！请统一把黑猫放在一位玩家身上。", 4000);
+                    setWitchVotes({});
+                }
+            };
+
+            useEffect(() => {
+                if (phase === Phase.INITIAL_NIGHT) {
+                    const witchPlayers = players.filter(p => p.identityCards.some(c => c.identity === Identity.WITCH));
+                    if (players.length > 0 && witchPlayers.length > 0 && Object.keys(witchVotes).length === witchPlayers.length) {
+                        checkWitchConsensus();
+                    }
+                }
+            }, [witchVotes]);
+
+
+            const handleInitialBlackCatPlacement = (targetId) => {
+                if (getEffectiveRole(players[targetId], players).id === 'maid') {
+                    showToast("女仆免疫黑猫！");
+                    setWitchVotes({});
+                    return;
+                }
+                
+                const blackCatCard = { id: `card-blackcat-special`, name: '黑猫', type: CardType.BLUE, icon: Cat, desc: '先手行动' };
+                const newPlayers = [...players];
+                newPlayers[targetId].blueCards.push(blackCatCard);
+                setPlayers(newPlayers);
+
+                setSystemMessage(`黑猫被放置在 ${players[targetId].character.name} 身上`);
+                setTimeout(() => {
+                    setCurrentPlayerIndex(targetId);
+                    setPhase(Phase.DAY_TURN);
+                    setTurnTimer(35);
+                    showToast("天亮了！拥有黑猫的玩家先行动");
+                }, 2000);
+            };
+
+            const handlePlayCard = (card) => {
+                if (card.name === '黑夜') {
+                    const hasConspiracy = players[currentPlayerIndex].hand.some(c => c.name === '传染');
+                    if (hasConspiracy) {
+                        showToast("必须先打出 [传染] !");
+                        return;
+                    }
+                }
+
+                if (card.type === CardType.BLACK) {
+                    const newPlayers = [...players];
+                    const pIndex = newPlayers.findIndex(p => p.id === currentPlayerIndex);
+                    newPlayers[pIndex].hand = newPlayers[pIndex].hand.filter(c => c.id !== card.id);
+                    setPlayers(newPlayers);
+                    setDiscardPile([...discardPile, card]);
+
+                    if (card.name === '传染') {
+                        handleConspiracyStart();
+                    } else if (card.name === '黑夜') {
+                         setSystemMessage('天黑了...');
+                         startNightPhase();
+                    }
+                } else {
+                    if (selectedCardIds.includes(card.id)) {
+                        setSelectedCardIds([]);
+                    } else {
+                        const p = players[myPlayerId];
+                        const effectiveRole = getEffectiveRole(p, players);
+                        if (card.name === '辩护' && effectiveRole.id === 'doctor') {
+                             setSelectedCardIds([card.id]);
+                             showToast("医生技能：可将辩护作为目击使用");
+                        } else {
+                             setSelectedCardIds([card.id]);
+                        }
+                    }
+                }
+            };
+
+            const handleGirlTrialStart = () => {
+                handleDrawCards(2, false, false);
+                setGirlTrialMode(true);
+                showToast("少女技能：已奖励摸牌，请选择你要审判的玩家");
+            };
+
+            const handleTargetClick = (targetId) => {
+                if (girlTrialMode) {
+                    const me = players[myPlayerId];
+                    const target = players[targetId];
+                    
+                    const hand = [...me.hand];
+                    const needed = 7;
+                    let currentSum = 0;
+                    let toDiscard = [];
+                    
+                    const witnesses = hand.filter(c => c.name === '目击');
+                    const evidences = hand.filter(c => c.name === '证据');
+                    const accusations = hand.filter(c => c.name === '指控');
+                    
+                    if (witnesses.length > 0) {
+                        toDiscard.push(witnesses[0]);
+                        currentSum = 7;
+                    } else {
+                        while (currentSum < needed && evidences.length > 0) {
+                            toDiscard.push(evidences.pop());
+                            currentSum += 3;
+                        }
+                        while (currentSum < needed && accusations.length > 0) {
+                            toDiscard.push(accusations.pop());
+                            currentSum += 1;
+                        }
+                    }
+                    
+                    if (currentSum < needed) {
+                        showToast("计算错误，手牌不足以发起审判 (Bug check)");
+                        setGirlTrialMode(false);
+                        return;
+                    }
+                    
+                    const newPlayers = [...players];
+                    const p = newPlayers[myPlayerId];
+                    const t = newPlayers[targetId];
+                    const discardIds = toDiscard.map(c => c.id);
+                    p.hand = p.hand.filter(c => !discardIds.includes(c.id));
+                    
+                    t.accusations += currentSum; 
+                    setDiscardPile(prev => [...prev, ...toDiscard]);
+                    setPlayers(newPlayers);
+                    setGirlTrialMode(false);
+                    
+                    initiateTrial(targetId);
+                    return;
+                }
+
+                if (phase === Phase.INITIAL_NIGHT) {
+                    const amWitch = players[0].identityCards.some(c => c.identity === Identity.WITCH);
+                    if (amWitch) {
+                        castWitchVote(myPlayerId, targetId);
+                        return;
+                    }
+                }
+
+                const cardsToPlay = players[myPlayerId].hand.filter(c => selectedCardIds.includes(c.id));
+                if (cardsToPlay.length === 0) return;
+
+                cardsToPlay.forEach(card => executeCardEffect(card, [targetId]));
+                
+                const newPlayers = [...players];
+                newPlayers[myPlayerId].hand = newPlayers[myPlayerId].hand.filter(c => !selectedCardIds.includes(c.id));
+                setPlayers(newPlayers);
+                setDiscardPile([...discardPile, ...cardsToPlay]);
+                setSelectedCardIds([]);
+                setHasPlayedCard(true);
+            };
+
+            const executeCardEffect = (card, targetIds) => {
+                const targetId = targetIds[0];
+                const newPlayers = [...players];
+                const target = newPlayers[targetId];
+                const source = newPlayers[currentPlayerIndex];
+                const sourceRole = getEffectiveRole(source, newPlayers);
+                const targetRole = getEffectiveRole(target, newPlayers);
+                
+                if (targetRole.id === 'beggar' && (card.name === '抢劫' || card.name === '纵火')) {
+                    showToast("乞丐免疫此效果！");
+                    return; 
+                }
+
+                if (targetRole.id === 'maid' && card.name === '情侣') {
+                    showToast("女仆免疫情侣效果！");
+                    return;
+                }
+
+                const isDoctorAttack = card.name === '辩护' && sourceRole.id === 'doctor';
+
+                if (card.type === CardType.RED || isDoctorAttack) {
+                    let amount = 1;
+                    if (card.name === '目击' || isDoctorAttack) amount = 7;
+                    else if (card.name === '证据') amount = 3;
+
+                    if (targetRole.id === 'minister' && card.name === '证据') {
+                        amount = 1;
+                        showToast("部长技能：证据仅算作1指控");
+                    }
+
+                    const asylum = target.blueCards.find(c => c.name === '避难');
+                    if (!asylum) {
+                        target.accusations += amount;
+                        
+                        let threshold = 7;
+                        if (sourceRole.id === 'judge') threshold = 6;
+                        if (targetRole.id === 'strongman') threshold = 8;
+
+                        if (target.accusations >= threshold) {
+                            initiateTrial(targetId); 
+                        }
+                    } else {
+                         showToast(`${target.character.name} 拥有避难所!`);
+                    }
+                } else if (card.type === CardType.BLUE) {
+                    target.blueCards.push(card);
+                } else if (card.name === '抢劫') {
+                    if (target.hand.length > 0) {
+                         const stolen = target.hand.pop();
+                         source.hand.push(stolen);
+                         showToast(`抢到了 ${stolen.name}`);
+                    }
+                } else if (card.name === '纵火') {
+                     target.hand = [];
+                     showToast("手牌已清空");
+                }
+                setPlayers(newPlayers);
+            };
+            
+            const initiateTrial = (targetId) => {
+                const source = players[currentPlayerIndex];
+                const victim = players[targetId];
+                const unrevealed = victim.identityCards.filter(c => !c.isRevealed);
+                if (unrevealed.length === 0) return;
+                
+                setTrialTargetId(targetId);
+                setPhase(Phase.TRIAL_REVEAL);
+
+                if (source.isHuman) {
+                    showToast(`审判开始！请点击 ${victim.character.name} 进行翻牌`, 6000);
+                } else {
+                    showToast(`${source.character.name} 发起了审判...`);
+                }
+            };
+
+            const handleIdentityCardClick = (targetId, cardIndex) => {
+                 const target = players[targetId];
+                 if (!target) return;
+                 
+                 const isTrial = phase === Phase.TRIAL_REVEAL && trialTargetId === targetId;
+                 const isConspiracy = phase === Phase.RESOLVE_CONSPIRACY_REVEAL && blackCatHolderId === targetId;
+                 
+                 if (!isTrial && !isConspiracy) return;
+
+                 const card = target.identityCards[cardIndex];
+                 if (card.isRevealed) return;
+
+                 revealIdentity(targetId, card);
+
+                 if (isTrial) {
+                     const newPlayers = [...players]; 
+                     const p = newPlayers[targetId];
+                     
+                     if (!p.isDead) {
+                         const source = newPlayers[currentPlayerIndex];
+                         const sourceRole = getEffectiveRole(source, newPlayers);
+                         
+                         p.accusations = 0;
+                         if (sourceRole.id === 'child') {
+                             source.accusations = 0;
+                             showToast("小孩技能：清空自身指控");
+                         }
+                         setPlayers(newPlayers);
+                         setPhase(Phase.DAY_TURN); 
+                     } else {
+                         setPhase(Phase.DAY_TURN); 
+                     }
+                 } else if (isConspiracy) {
+                     setPhase(Phase.RESOLVE_CONSPIRACY_ROTATION);
+                 }
+            };
+
+            const revealIdentity = (playerId, card) => {
+                const newPlayers = [...players];
+                const p = newPlayers[playerId];
+                const cIndex = p.identityCards.indexOf(card);
+                if (cIndex !== -1) {
+                    p.identityCards[cIndex].isRevealed = true;
+                    
+                    const identityName = card.identity === Identity.WITCH ? '女巫' : card.identity === Identity.CONSTABLE ? '警长' : '平民';
+                    const msg = `角色 ${p.character.name} 刚刚被翻开的身份是：${identityName}`;
+                    showToast(msg, 5000);
+                    
+                    const allRevealed = p.identityCards.every(c => c.isRevealed);
+                    const witchRevealed = card.identity === Identity.WITCH;
+                    const willDie = allRevealed || witchRevealed;
+
+                    if (willDie) {
+                        p.isDead = true;
+                        setTimeout(() => handlePlayerDeath(playerId), 1000);
+                    } else {
+                        const housewives = newPlayers.filter(hp => !hp.isDead && hp.id !== playerId && getEffectiveRole(hp, newPlayers).id === 'housewife');
+                        
+                        if (housewives.length > 0) {
+                            const currentDeck = [...deck];
+                            let drawnCount = 0;
+                            housewives.forEach(hp => {
+                                if (currentDeck.length > 0) {
+                                    hp.hand.push(currentDeck.pop());
+                                    drawnCount++;
+                                    showToast(`家庭主妇 ${hp.character.name} 获得一张手牌`);
+                                }
+                            });
+                            if (drawnCount > 0) setDeck(currentDeck);
+                        }
+                    }
+                }
+                setPlayers(newPlayers);
+            };
+
+            const handlePlayerDeath = (pid) => {
+                const p = players[pid];
+                if(!p) return;
+                
+                showToast(`${p.character.name} 已死亡!`, 4000);
+                const newPlayers = [...players];
+                const deadP = newPlayers[pid];
+                
+                const farmers = newPlayers.filter(p => !p.isDead && getEffectiveRole(p, newPlayers).id === 'farmer');
+                if (farmers.length > 0) {
+                    const farmer = farmers[0];
+                    farmer.hand = [...farmer.hand, ...deadP.hand];
+                    farmer.blueCards = [...farmer.blueCards, ...deadP.blueCards];
+                    showToast(`农民发动了技能：继承了遗物`);
+                } else {
+                    setDiscardPile(prev => [...prev, ...deadP.hand, ...deadP.blueCards]);
+                }
+                
+                deadP.hand = [];
+                deadP.blueCards = [];
+                setPlayers(newPlayers);
+            };
+
+            const handlePriestDraw = (isAI = false) => {
+                const newPlayers = [...players];
+                const p = newPlayers[currentPlayerIndex];
+                
+                if (!isAI && discardPile.length < 2) { showToast("弃牌堆不足"); return; }
+                
+                let picked = [];
+                let newDiscard = [...discardPile];
+                
+                const validIndices = newDiscard.map((c, i) => c.type !== CardType.BLACK ? i : -1).filter(i => i !== -1);
+                
+                if (validIndices.length >= 2) {
+                    const idx1 = validIndices[validIndices.length - 1];
+                    const idx2 = validIndices[validIndices.length - 2];
+                    const c1 = newDiscard.splice(idx1, 1)[0];
+                    const c2 = newDiscard.splice(idx2, 1)[0];
+                    picked = [c1, c2];
+                } else {
+                    handleDrawCards(2, false, true);
+                    return;
+                }
+                
+                p.hand = [...p.hand, ...picked];
+                p.priestUsedCount = (p.priestUsedCount || 0) + 1;
+                
+                setDiscardPile(newDiscard);
+                setPlayers(newPlayers);
+                showToast("牧师技能：从弃牌堆回收2张牌");
+                endTurn(newPlayers);
+            };
+
+            const handleDrawCards = (forceCount = 2, useDiscard = false, endTurnAfter = true) => {
+                const newPlayers = [...players];
+                const p = newPlayers[currentPlayerIndex];
+                const role = getEffectiveRole(p, newPlayers);
+
+                const drawn = [];
+                let currentDeck = useDiscard ? [...discardPile] : [...deck];
+                let currentDiscard = useDiscard ? [] : [...discardPile];
+                
+                for(let i=0; i<forceCount; i++) {
+                    if (currentDeck.length === 0) {
+                         if (currentDiscard.length === 0) break;
+                         currentDeck = shuffle(currentDiscard);
+                         currentDiscard = [];
+                    }
+                    drawn.push(currentDeck.pop());
+                }
+                
+                if (role.id === 'landlord' && forceCount === 2) {
+                    const accusationCount = drawn.filter(c => c.name === '指控' || c.type === CardType.RED).length;
+                    if (accusationCount >= 2) {
+                         if (currentDeck.length > 0) {
+                             drawn.push(currentDeck.pop());
+                             showToast("地主发动了技能：额外获得一张牌");
+                         }
+                    }
+                }
+
+                if (useDiscard) {
+                    setDiscardPile(currentDeck); 
+                } else {
+                    setDeck(currentDeck);
+                    setDiscardPile(currentDiscard);
+                }
+                
+                p.hand = [...p.hand, ...drawn];
+                setPlayers(newPlayers);
+                
+                const blackCards = drawn.filter(c => c.type === CardType.BLACK);
+                if (blackCards.length > 0) {
+                    showToast("你摸到了黑卡! 必须立即打出。");
+                } else if (endTurnAfter) {
+                    endTurn(newPlayers);
+                }
+            };
+
+            const endTurn = (currentPlayersState) => {
+                const currentP = currentPlayersState[currentPlayerIndex];
+                if (currentP.hand.some(c => c.type === CardType.BLACK)) return;
+
+                setHasPlayedCard(false);
+                setTurnTimer(35);
+                setGirlTrialMode(false); 
+                
+                let nextIndex = (currentPlayerIndex + 1) % currentPlayersState.length;
+                while(currentPlayersState[nextIndex].isDead) {
+                    nextIndex = (nextIndex + 1) % currentPlayersState.length;
+                }
+                setCurrentPlayerIndex(nextIndex);
+            };
+
+            // --- Conspiracy Logic ---
+            const handleConspiracyStart = () => {
+                setSystemMessage('传染生效！请点击黑猫玩家头像，选择翻开一张身份牌');
+                if (!players[blackCatHolderId] || players[blackCatHolderId].isDead) {
+                    setPhase(Phase.RESOLVE_CONSPIRACY_ROTATION);
+                } else {
+                    const currentPlayer = players[currentPlayerIndex];
+                    if (currentPlayer.isHuman) {
+                        showToast(`请点击 ${players[blackCatHolderId].character.name} 选择并翻开一张身份牌`, 5000);
+                    }
+                    setPhase(Phase.RESOLVE_CONSPIRACY_REVEAL);
+                }
+            };
+
+            const handleConspiracyInteraction = (targetId) => {
+                if (phase === Phase.RESOLVE_CONSPIRACY_ROTATION) {
+                    performRotation();
+                }
+            };
+            
+            const performRotation = () => {
+                const newPlayers = [...players];
+                const moves = []; 
+                
+                newPlayers.forEach(p => {
+                     if (p.isDead) return;
+                     let leftId = getLivingLeftNeighbor(p.id, newPlayers);
+                     const neighbor = newPlayers[leftId];
+                     const unrevealed = neighbor.identityCards.filter(c => !c.isRevealed);
+                     if (unrevealed.length > 0) {
+                         const cardToSteal = unrevealed[Math.floor(Math.random() * unrevealed.length)]; 
+                         moves.push({ to: p.id, from: leftId, card: cardToSteal });
+                     }
+                });
+                
+                moves.forEach(m => {
+                    const fromP = newPlayers[m.from];
+                    const toP = newPlayers[m.to];
+                    const cIdx = fromP.identityCards.indexOf(m.card);
+                    if (cIdx > -1) fromP.identityCards.splice(cIdx, 1);
+                    toP.identityCards.push(m.card);
+                });
+                
+                setPlayers(newPlayers);
+                setPhase(Phase.RESOLVE_CONSPIRACY_COMPLETED);
+                setTimeout(() => {
+                     const p = newPlayers[currentPlayerIndex];
+                     const blackNight = p.hand.find(c => c.name === '黑夜');
+                     if (blackNight) {
+                         handlePlayCard(blackNight);
+                     } else {
+                         endTurn(newPlayers);
+                     }
+                }, 3000);
+            };
+
+            // --- Night Logic ---
+            const startNightPhase = () => {
+                setPhase(Phase.NIGHT_WITCH);
+                setWitchDisagreementCount(0);
+                setLastWitchVotes({});
+                showToast("天黑请闭眼...");
+            };
+            
+            const handleWitchPlayerVote = (targetId) => {
+                setLastWitchVotes({ [myPlayerId]: targetId });
+                if (witchDisagreementCount === 0) {
+                    setWitchDisagreementCount(1);
+                    showToast("女巫意见不统一! 请重新选择。");
+                } else {
+                    handleNightAction('WITCH', targetId);
+                }
+            };
+
+            const handleNightAction = (role, targetId) => {
+                if (role === 'WITCH') {
+                    setPhase(Phase.NIGHT_CONSTABLE);
+                } else if (role === 'CONSTABLE') {
+                    setProtectionTargetId(targetId);
+                    setVisibleProtectionTargetId(targetId); 
+                    
+                    setPhase(Phase.DAWN_PRE_ANNOUNCE);
+                    setSystemMessage(`昨晚，警长保护了 ${targetId !== null ? players[targetId].character.name : '没人'}.`);
+                    setTimeout(() => setPhase(Phase.DAWN_CONFESSION), 4000);
+                }
+            };
+
+            const resolveDawn = (userConfessed, isOfficialSecret = false) => {
+                const newPlayers = [...players];
+                let witchTargetId = null;
+                if (lastWitchVotes && Object.values(lastWitchVotes).length > 0) {
+                    witchTargetId = parseInt(Object.values(lastWitchVotes)[0]);
+                }
+                
+                const me = newPlayers[myPlayerId];
+
+                if (isOfficialSecret) {
+                    me.officialSkillUsed = true;
+                    showToast("官员使用了特权：自首不翻牌！");
+                }
+
+                if (witchTargetId !== null) {
+                    if (witchTargetId === protectionTargetId) {
+                        showToast(`平安夜！`);
+                    } else {
+                        if (witchTargetId === myPlayerId && userConfessed) {
+                            if (isOfficialSecret) {
+                                // Saved
+                            } else {
+                                const p = newPlayers[myPlayerId];
+                                const role = getEffectiveRole(p, newPlayers);
+                                const unrevealed = p.identityCards.filter(c => !c.isRevealed);
+                                if (unrevealed.length > 0) {
+                                    unrevealed[0].isRevealed = true;
+                                    showToast(`${p.character.name} 自首并翻开了身份`);
+                                }
+                            }
+                        } else {
+                            newPlayers[witchTargetId].isDead = true;
+                            handlePlayerDeath(witchTargetId);
+                        }
+                    }
+                }
+
+                showToast("天亮了...");
+                setPhase(Phase.DAY_TURN);
+                let newDrawPile = [...deck, ...discardPile];
+                const nightIndex = newDrawPile.findIndex(c => c.name === '黑夜');
+                let nightCard = null;
+                if(nightIndex > -1) {
+                     nightCard = newDrawPile.splice(nightIndex, 1)[0];
+                }
+                newDrawPile = shuffle(newDrawPile);
+                if(nightCard) newDrawPile.unshift(nightCard);
+                setDeck(newDrawPile);
+                setDiscardPile([]);
+                setPlayers(newPlayers);
+            };
+
+            const useStorytellerSkill = () => {
+                 const newDeck = shuffle([...deck]);
+                 setDeck(newDeck);
+                 const newPlayers = [...players];
+                 newPlayers[myPlayerId].storytellerUsed = true;
+                 setPlayers(newPlayers);
+                 showToast("说书人技能：牌堆已洗牌");
+            };
+
+            // --- RENDER METHODS ---
+            
+            const renderLanding = () => (
+                <div className="min-h-screen flex flex-col items-center justify-center bg-black text-center animate-fade-in p-4 relative overflow-hidden">
+                    <div className="absolute inset-0 z-0 opacity-60 bg-[url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2568&auto=format&fit=crop')] bg-cover bg-center grayscale contrast-125"></div>
+                    <div className="absolute inset-0 z-0 bg-gradient-to-t from-black via-transparent to-black opacity-90"></div>
+                    
+                    <div className="z-10 flex flex-col items-center max-w-3xl">
+                        <h1 className="text-6xl md:text-8xl font-black text-[#e7e5e4] tracking-wider mb-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] font-serif">女巫镇</h1>
+                        <p className="text-xl text-[#a8a29e] italic mb-12 font-serif px-4 tracking-widest">“小镇即将迎来它的第一波客人...”</p>
+                        
+                        <div className="flex gap-4">
+                            <button onClick={() => setView(View.JOIN_ROOM)} className="bg-[#78350f] text-[#e7e5e4] px-6 py-3 rounded font-bold hover:bg-[#92400e] shadow-lg border border-[#451a03] flex items-center gap-2 transition-transform hover:-translate-y-1">
+                                <UserPlus size={18} /> 加入房间
+                            </button>
+                            <button onClick={startSetupHost} className="bg-purple-800 hover:bg-purple-900 text-white px-6 py-3 rounded font-bold shadow-lg border border-purple-900 flex items-center gap-2 transition-transform hover:-translate-y-1">
+                                <Users size={18} /> 好友对战
+                            </button>
+                            <button onClick={() => setView(View.RULES)} className="bg-[#292524] text-[#e7e5e4] px-6 py-3 rounded font-bold hover:bg-[#44403c] shadow-lg border border-[#57534e] flex items-center gap-2 transition-transform hover:-translate-y-1">
+                                <BookOpen size={18} /> 小镇规则
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+            
+            const renderRules = () => (
+                 <div className="min-h-screen flex flex-col items-center justify-center bg-black/80 p-4 animate-fade-in">
+                     <div className="max-w-3xl bg-[#1c1917] p-8 rounded shadow-xl border-2 border-[#78350f] relative overflow-y-auto max-h-[80vh]">
+                         <button onClick={() => setView(View.LANDING)} className="absolute top-4 right-4 text-[#78350f] hover:text-red-900"><X /></button>
+                         <h2 className="text-3xl font-black mb-6 text-center font-serif text-[#e7e5e4] tracking-widest">小镇规则</h2>
+                         
+                         <div className="space-y-6 font-serif text-[#a8a29e] text-sm md:text-base leading-relaxed">
+                             <p className="text-[#e7e5e4] font-bold text-center italic">
+                                 欢迎各位村民踏入女巫镇的迷雾！这是一场交织着欺骗、推理与生存的冒险，唯有敏锐的洞察力与默契的协作，才能在猜忌中守护小镇安宁～
+                             </p>
+
+                             <div className="space-y-2">
+                                <h3 className="text-[#b45309] font-bold text-lg border-b border-[#44403c] pb-1 mb-2">📜 核心游戏规则</h3>
+                                <ul className="space-y-2 list-disc pl-5 marker:text-[#78350f]">
+                                    <li><strong className="text-[#e7e5e4]">游戏核心：</strong>围绕「欺骗、推理、生存」展开，玩家需在迷雾中隐藏身份、识破谎言，争夺最终胜利；</li>
+                                    <li><strong className="text-[#e7e5e4]">指控机制：</strong>通过抽卡、出牌的策略博弈，为其他玩家累积「指控值」；</li>
+                                    <li><strong className="text-[#e7e5e4]">审判触发：</strong>当任一玩家的指控值达到上限（默认 7 点），将强制接受小镇审判，需公开自己的身份牌；</li>
+                                    <li><strong className="text-[#e7e5e4]">胜利条件：</strong>
+                                        <ul className="list-circle pl-5 mt-1 space-y-1 text-xs md:text-sm">
+                                            <li><span className="text-green-500">平民阵营：</span>所有【女巫】身份卡都被翻開，不需要將女巫陣營的玩家全部殺死。</li>
+                                            <li><span className="text-purple-500">女巫阵营：</span>殺光村民，存活玩家都是女巫陣營時。持有或是曾經拿到女巫卡的玩家就會變成女巫陣營。</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong className="text-[#e7e5e4]">警长特权：</strong>每晚可选择保护一名玩家，免受单次致命伤害；</li>
+                                    <li><strong className="text-[#e7e5e4]">黑猫诅咒：</strong>持有「黑猫」卡牌的玩家获得先手出牌权，但需警惕「传染」卡牌的反噬效果！</li>
+                                </ul>
+                             </div>
+
+                             <div className="space-y-2 mt-6 pt-6 border-t border-[#44403c]">
+                                <h3 className="text-[#991b1b] font-bold text-lg mb-2">💖 特别致谢</h3>
+                                <p>本游戏目前仍处于开发测试阶段，所有规则与内容可能根据测试反馈持续优化，不代表最终品质。</p>
+                                <p>衷心感谢每一位参与测试的「小镇村民」：<span className="text-[#e7e5e4]">俊坤、李源琦大王、薇薇、煎饼、神秘美女丁、洋秘</span></p>
+                                <p>同时，特别鸣谢为游戏提供核心资料支持的 <span className="text-[#e7e5e4] font-bold">平凡老师</span>，是你们的陪伴与建议，让女巫镇的冒险之路更加完整～</p>
+                             </div>
+                             
+                             <p className="text-center text-[#b45309] font-bold mt-4">✨ 后续将持续更新游戏内容，敬请期待！——女巫镇镇长 Mr. Junnan</p>
+                         </div>
+                     </div>
+                 </div>
+            );
+
+            const renderSetupHost = () => (
+                <div className="min-h-screen flex items-center justify-center p-4 relative bg-transparent">
+                     <div className="w-full max-w-2xl h-[340px] glass-panel rounded-lg overflow-hidden flex flex-row animate-slide-up z-10 shadow-2xl">
+                         <div className="w-1/2 p-6 border-r border-[#44403c] flex flex-col justify-between bg-[#1c1917]">
+                            <h2 className="text-2xl font-serif text-[#e7e5e4] text-center font-black mb-2">创建房间</h2>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-[#a8a29e] text-sm mb-1 font-bold">你的名字</label>
+                                    <input 
+                                        type="text" 
+                                        value={myDisplayName}
+                                        onChange={e => setMyDisplayName(e.target.value)}
+                                        placeholder="输入你的名字..."
+                                        className="w-full p-2 bg-[#0c0a09] border border-[#44403c] rounded focus:border-[#78350f] outline-none text-[#e7e5e4]"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[#a8a29e] text-sm mb-1 flex justify-between">
+                                        <span>玩家人数</span>
+                                        <span className="font-bold text-[#78350f]">{playerCount}</span>
+                                    </label>
+                                    <input 
+                                        type="range" min="4" max="12" value={playerCount} 
+                                        onChange={(e) => setPlayerCount(parseInt(e.target.value))}
+                                        className="w-full h-2 bg-[#44403c] rounded-lg appearance-none cursor-pointer accent-[#78350f]"
+                                    />
+                                </div>
+                            </div>
+                            <button 
+                               onClick={enterWaitingRoom}
+                               className="w-full py-3 bg-[#78350f] hover:bg-[#92400e] text-[#f5f5dc] font-bold text-base rounded shadow transition-colors border border-[#451a03] font-serif mt-2"
+                            >
+                                创建房间
+                            </button>
+                            <button onClick={() => setView(View.LANDING)} className="text-xs text-[#a8a29e] hover:underline text-center">返回</button>
+                         </div>
+                         <div className="w-1/2 p-6 bg-[#0c0a09]/30 flex flex-col justify-center items-center text-center">
+                             <Users className="w-16 h-16 text-[#78350f] opacity-50 mb-4" />
+                             <p className="text-[#a8a29e] text-sm italic">"邀请你的朋友，或者... 敌人。"</p>
+                         </div>
+                     </div>
+                </div>
+            );
+            
+            const renderJoinRoom = () => (
+                <div className="min-h-screen flex items-center justify-center p-4 relative bg-transparent">
+                     <div className="w-full max-w-md glass-panel rounded-lg p-6 animate-slide-up z-10 shadow-2xl bg-[#1c1917]">
+                        <h2 className="text-2xl font-serif text-[#e7e5e4] text-center font-black mb-6">加入房间</h2>
+                        <div className="space-y-4 mb-6">
+                            <div>
+                                <label className="block text-[#a8a29e] text-sm mb-1 font-bold">你的名字</label>
+                                <input 
+                                    type="text" 
+                                    value={myDisplayName}
+                                    onChange={e => setMyDisplayName(e.target.value)}
+                                    placeholder="输入你的名字..."
+                                    className="w-full p-2 bg-[#0c0a09] border border-[#44403c] rounded focus:border-[#78350f] outline-none text-[#e7e5e4]"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[#a8a29e] text-sm mb-1 font-bold">房间号</label>
+                                <input 
+                                    type="text" 
+                                    value={roomId}
+                                    onChange={e => setRoomId(e.target.value)}
+                                    placeholder="粘贴房主的ID..."
+                                    className="w-full p-2 bg-[#0c0a09] border border-[#44403c] rounded focus:border-[#78350f] outline-none text-[#e7e5e4]"
+                                />
+                            </div>
+                        </div>
+                        <button 
+                           onClick={enterWaitingRoom}
+                           className="w-full py-3 bg-[#1e3a8a] hover:bg-[#1e40af] text-[#f5f5dc] font-bold text-base rounded shadow transition-colors border border-[#172554] font-serif"
+                        >
+                            加入游戏
+                        </button>
+                        <button onClick={() => setView(View.LANDING)} className="w-full mt-2 text-xs text-[#a8a29e] hover:underline text-center">返回</button>
+                     </div>
+                </div>
+            );
+            
+            const renderWaitingRoom = () => {
+                const allReady = connectedPlayers.length > 1 && connectedPlayers.every(p => p.isReady);
+                const copyRoomId = () => {
+                    navigator.clipboard.writeText(roomId);
+                    showToast("房间号已复制!");
+                };
+                
+                return (
+                    <div className="min-h-screen flex flex-col items-center p-4 bg-transparent">
+                         <div className="w-full max-w-4xl glass-panel rounded-lg p-6 mt-10 shadow-2xl relative min-h-[500px] flex flex-col bg-[#1c1917]/90">
+                             <div className="flex justify-between items-center border-b border-[#78350f] pb-4 mb-6">
+                                 <div>
+                                     <h2 className="text-2xl font-serif font-bold text-[#e7e5e4]">游戏房间</h2>
+                                     <div className="flex items-center gap-2 text-sm text-[#a8a29e] mt-1">
+                                         <span>房间ID: {roomId}</span>
+                                         <button onClick={copyRoomId} className="p-1 hover:bg-[#292524] rounded"><Copy size={14}/></button>
+                                     </div>
+                                 </div>
+                                 <button onClick={() => setView(View.LANDING)} className="text-[#991b1b] hover:underline text-sm font-bold">离开</button>
+                             </div>
+                             
+                             <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 content-start">
+                                 {connectedPlayers.map((p, i) => (
+                                     <div key={i} className="flex flex-col items-center p-4 bg-[#292524] rounded border border-[#44403c] relative">
+                                         <div className="w-16 h-16 rounded-full bg-[#78350f] text-[#e6e0d4] flex items-center justify-center text-2xl font-bold mb-2 shadow-inner">
+                                             {p.name[0]}
+                                         </div>
+                                         <span className="font-bold text-[#e7e5e4] truncate w-full text-center">{p.name}</span>
+                                         {p.isHost && <span className="absolute top-2 right-2 text-yellow-600"><Crown size={16} /></span>}
+                                         {p.isReady && <span className="absolute top-2 left-2 text-green-600"><Check size={16} /></span>}
+                                     </div>
+                                 ))}
+                                 
+                                 {Array.from({length: Math.max(0, playerCount - connectedPlayers.length)}).map((_, i) => (
+                                      <div key={`empty-${i}`} className="flex flex-col items-center p-4 border-2 border-dashed border-[#44403c] rounded opacity-50 justify-center">
+                                          <span className="text-[#78716c] text-sm">等待加入...</span>
+                                      </div>
+                                 ))}
+                             </div>
+                             
+                             <div className="mt-6 border-t border-[#78350f] pt-6 flex justify-between items-center">
+                                 <button onClick={copyRoomId} className="flex items-center gap-2 text-[#1e3a8a] font-bold hover:underline">
+                                     <UserPlus size={20}/> 邀请好友
+                                 </button>
+                                 
+                                 {isHost ? (
+                                     <button 
+                                         onClick={launchGameSetup}
+                                         disabled={!allReady}
+                                         className={`px-8 py-3 rounded font-bold text-lg shadow-lg border border-transparent transition-all
+                                            ${allReady ? 'bg-[#15803d] hover:bg-[#166534] text-white border-[#052e16]' : 'bg-[#44403c] text-[#a8a29e] cursor-not-allowed'}
+                                         `}
+                                     >
+                                         开始游戏
+                                     </button>
+                                 ) : (
+                                     <button 
+                                         onClick={() => {
+                                             if(hostConn) hostConn.send({ type: 'READY_TOGGLE', isReady: !connectedPlayers.find(p => p.name === myDisplayName)?.isReady });
+                                         }}
+                                         className={`px-8 py-3 rounded font-bold text-lg shadow-lg border transition-all
+                                             ${connectedPlayers.find(p => p.name === myDisplayName)?.isReady 
+                                                ? 'bg-[#292524] text-[#15803d] border-[#15803d]' 
+                                                : 'bg-[#15803d] text-white border-[#052e16] hover:bg-[#166534]'}
+                                         `}
+                                     >
+                                         {connectedPlayers.find(p => p.name === myDisplayName)?.isReady ? "已准备" : "准备"}
+                                     </button>
+                                 )}
+                             </div>
+                         </div>
+                    </div>
+                );
+            };
+
+            const renderCharSelect = () => {
+                const myChoice = takenCharacters.find(id => id === myDisplayName); 
+                
+                return (
+                <div className="min-h-screen flex items-center justify-center p-4 relative bg-transparent">
+                    <div className="w-full max-w-5xl flex flex-col items-center z-10">
+                        <h2 className="text-2xl md:text-3xl text-[#e7e5e4] font-serif mb-8 animate-fade-in drop-shadow-sm font-black tracking-wider">
+                            请选择要扮演的角色
+                        </h2>
+                        
+                        <div className="flex flex-row gap-6 items-center justify-center flex-wrap">
+                            {charChoices.map((char, idx) => (
+                                <div 
+                                    key={char.id}
+                                    onClick={() => initGame(char.id)}
+                                    className={`
+                                        w-44 h-60 glass-panel rounded-lg border-2 border-[#78350f] hover:border-[#b45309]
+                                        cursor-pointer transition-all duration-300 transform hover:-translate-y-2 hover:shadow-xl
+                                        flex flex-col items-center p-4 animate-slide-up bg-[#1c1917]
+                                    `}
+                                    style={{animationDelay: `${idx * 0.1}s`}}
+                                >
+                                    <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-[#44403c] mb-4 shadow-inner bg-[#0c0a09] relative">
+                                        <AvatarImage 
+                                            charId={char.id}
+                                            alt={char.name}
+                                            className="w-full h-full object-cover opacity-80"
+                                        />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-[#e7e5e4] mb-2 font-serif">{char.name}</h3>
+                                    <p className="text-center text-[10px] text-[#a8a29e] leading-tight font-serif px-1 italic flex-1">{char.desc}</p>
+                                    <div className="mt-auto pt-2 text-[#78350f] text-[10px] font-bold tracking-widest uppercase border-t border-[#44403c] w-full text-center">
+                                        {charChoices.length > 1 ? "点击选择" : "点击开始"}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )};
+
+            const renderGame = () => {
+                const isMyTurn = currentPlayerIndex === myPlayerId;
+                const me = players[myPlayerId];
+                const myRole = getEffectiveRole(me, players);
+                const amWitch = me && me.identityCards.some(c => c.identity === Identity.WITCH);
+                const amConstable = me && me.identityCards.some(c => c.identity === Identity.CONSTABLE && !c.isRevealed);
+                const girlCanJudge = myRole.id === 'girl' && getHandAccusationTotal(me.hand, false) >= 7;
+
+                return (
+                    <div className="h-screen w-full flex flex-col overflow-hidden relative bg-transparent">
+                        <div className={`fixed top-0 left-0 right-0 z-[100] transition-transform duration-300 ${systemMessage ? 'translate-y-0' : '-translate-y-full'}`}>
+                            <div className="bg-[#0c0a09]/95 text-[#e7e5e4] text-center py-3 font-bold shadow-lg backdrop-blur-sm border-b border-[#78350f] font-serif text-lg">
+                                {systemMessage}
+                            </div>
+                        </div>
+
+                        {/* Timer Bar */}
+                        {phase === Phase.DAY_TURN && (
+                            <div className="w-full h-1.5 bg-[#44403c] fixed top-0 z-40">
+                                <div 
+                                    className="h-full bg-gradient-to-r from-[#15803d] to-[#b91c1c] transition-all duration-1000 ease-linear shadow-sm"
+                                    style={{ width: `${(turnTimer / 35) * 100}%` }}
+                                />
+                            </div>
+                        )}
+
+                        {/* Deck Indicator */}
+                        <div className="absolute top-4 left-4 z-40 pointer-events-none">
+                            <div className="flex items-center gap-2 bg-[#1c1917] px-4 py-2 rounded border border-[#78350f] text-[#e7e5e4] shadow-lg backdrop-blur-sm">
+                                <Layers className="w-4 h-4 text-[#78350f]" />
+                                <span className="text-sm font-bold tracking-wider font-serif">牌堆: {deck.length}</span>
+                            </div>
+                        </div>
+
+                        {/* Game Area */}
+                        <div className="flex-1 relative pointer-events-auto flex flex-col">
+                            <div className="flex-1 flex items-center justify-center pb-40">
+                                <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 px-2 max-w-6xl">
+                                    {players.map(p => {
+                                        if (p.id === myPlayerId) return null;
+                                        
+                                        let isConspiracyTargetable = false;
+                                        if (phase === Phase.RESOLVE_CONSPIRACY_REVEAL && p.id === blackCatHolderId) isConspiracyTargetable = true;
+                                        if (phase === Phase.RESOLVE_CONSPIRACY_ROTATION) {
+                                            const targetLeft = getLivingLeftNeighbor(myPlayerId, players);
+                                            if (p.id === targetLeft) isConspiracyTargetable = true;
+                                        }
+                                        
+                                        const isNightTargetable = (phase === Phase.INITIAL_NIGHT && amWitch) || (phase === Phase.NIGHT_WITCH && amWitch) || (phase === Phase.NIGHT_CONSTABLE && amConstable);
+                                        const isDayTargetable = isMyTurn && selectedCardIds.length > 0 && !p.isDead;
+                                        
+                                        const isRevealPhase = (phase === Phase.TRIAL_REVEAL && trialTargetId === p.id) || (phase === Phase.RESOLVE_CONSPIRACY_REVEAL && blackCatHolderId === p.id);
+
+                                        return (
+                                            <PlayerAvatar 
+                                                key={p.id} 
+                                                player={p}
+                                                myPlayerId={myPlayerId}
+                                                allPlayers={players}
+                                                currentPlayerId={currentPlayerIndex}
+                                                isActive={currentPlayerIndex === p.id}
+                                                blackCatHolderId={blackCatHolderId}
+                                                protectionTargetId={visibleProtectionTargetId}
+                                                lastWitchVotes={lastWitchVotes}
+                                                isTargetable={isDayTargetable || isNightTargetable || isConspiracyTargetable || isRevealPhase}
+                                                revealMode={isRevealPhase}
+                                                girlTrialMode={girlTrialMode}
+                                                playerName={p.name}
+                                                onSelect={() => {
+                                                    if (isRevealPhase) {
+                                                        setIdentitySelectionTargetId(p.id);
+                                                    }
+                                                    else if (isConspiracyTargetable && phase !== Phase.RESOLVE_CONSPIRACY_REVEAL) handleConspiracyInteraction(p.id);
+                                                    else if (isNightTargetable) {
+                                                        if (phase === Phase.INITIAL_NIGHT) handleTargetClick(p.id);
+                                                        else if (phase === Phase.NIGHT_WITCH) handleWitchPlayerVote(p.id);
+                                                        else handleNightAction('CONSTABLE', p.id);
+                                                    }
+                                                    else if (isDayTargetable || girlTrialMode) handleTargetClick(p.id);
+                                                }}
+                                            />
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {identitySelectionTargetId !== null && (
+                            <IdentitySelectionModal 
+                                player={players[identitySelectionTargetId]}
+                                onClose={() => setIdentitySelectionTargetId(null)}
+                                onSelect={(idx) => {
+                                    handleIdentityCardClick(identitySelectionTargetId, idx);
+                                    setIdentitySelectionTargetId(null);
+                                }}
+                            />
+                        )}
+                        
+                        {/* Bottom Controls Area */}
+                        <div className="absolute bottom-0 w-full h-52 pointer-events-none z-30 bg-gradient-to-t from-black via-black/90 to-transparent">
+                            
+                            {/* My Avatar */}
+                            {me && (
+                                <div className="absolute bottom-6 left-4 md:left-8 z-40 pointer-events-auto">
+                                    <PlayerAvatar 
+                                        player={me}
+                                        myPlayerId={myPlayerId}
+                                        allPlayers={players}
+                                        currentPlayerId={currentPlayerIndex}
+                                        isActive={isMyTurn}
+                                        blackCatHolderId={blackCatHolderId}
+                                        protectionTargetId={visibleProtectionTargetId}
+                                        lastWitchVotes={lastWitchVotes}
+                                        isTargetable={false}
+                                        onSelect={() => {}}
+                                        isMe={true}
+                                        playerName={myDisplayName}
+                                    />
+                                    <div className="absolute -top-10 left-0 flex gap-1 w-max">
+                                        {myRole.id === 'storyteller' && !me.storytellerUsed && isMyTurn && (
+                                            <button onClick={useStorytellerSkill} className="p-1 bg-[#1e40af] rounded text-xs text-white flex items-center gap-1 px-2 py-1 hover:bg-[#1e3a8a] border border-[#172554] shadow">
+                                                <RotateCcw size={12} /> 洗牌
+                                            </button>
+                                        )}
+                                        {myRole.id === 'priest' && (me.priestUsedCount || 0) < 2 && isMyTurn && !hasPlayedCard && (
+                                            <button onClick={() => handlePriestDraw(false)} className="p-1 bg-[#92400e] rounded text-xs text-white flex items-center gap-1 px-2 py-1 hover:bg-[#78350f] border border-[#451a03] shadow">
+                                                <BookOpen size={12} /> 弃牌摸 ({2-(me.priestUsedCount||0)})
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {phase === Phase.DAWN_CONFESSION && (
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-auto bg-[#1c1917] border border-[#78350f] p-4 rounded-lg shadow-2xl text-center w-72 animate-slide-up">
+                                    <h3 className="text-[#e7e5e4] font-bold mb-2 font-serif">是否自首?</h3>
+                                    <div className="flex gap-2 justify-center flex-wrap">
+                                        <button onClick={() => resolveDawn(true)} className="px-3 py-1 bg-[#1e3a8a] border border-[#1e40af] text-white rounded text-xs hover:bg-[#1e40af]">自首</button>
+                                        
+                                        {myRole.id === 'official' && !me.officialSkillUsed && (
+                                            <button onClick={() => resolveDawn(true, true)} className="px-3 py-1 bg-[#78350f] border border-[#451a03] text-white rounded text-xs hover:bg-[#92400e]">
+                                                自首(不翻牌)
+                                            </button>
+                                        )}
+                                        
+                                        <button onClick={() => resolveDawn(false)} className="px-3 py-1 bg-[#b91c1c] border border-[#991b1b] text-white rounded text-xs hover:bg-[#991b1b]">不想自首</button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* My Hand Cards */}
+                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-end justify-center gap-1 z-50 w-full max-w-2xl pointer-events-none">
+                                {me && me.hand.map((card, index) => (
+                                    <div key={card.id} className="pointer-events-auto transform transition-transform hover:-translate-y-4" style={{zIndex: index}}>
+                                        <Card 
+                                            card={card} 
+                                            isSelected={selectedCardIds.includes(card.id)}
+                                            onClick={(c) => handlePlayCard(c)}
+                                            disabled={!isMyTurn || (me.hand.some(h => h.type === CardType.BLACK) && card.type !== CardType.BLACK)}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            {/* Circular Action Buttons - Right Side */}
+                            <div className="absolute bottom-6 right-4 md:right-8 flex flex-row gap-4 pointer-events-auto items-end">
+                                    {isMyTurn && phase === Phase.DAY_TURN && (
+                                        me.hand.some(c => c.type === CardType.BLACK) ? (
+                                            <button onClick={() => handlePlayCard(me.hand.find(c => c.type === CardType.BLACK))} 
+                                                className="w-20 h-20 rounded-full bg-[#581c87] text-white flex flex-col items-center justify-center gap-1 animate-pulse shadow-xl border-2 border-[#3b0764] hover:scale-105 transition-transform">
+                                                <Skull className="w-8 h-8" />
+                                                <span className="text-[10px] font-bold">打出黑卡</span>
+                                            </button>
+                                        ) : (
+                                            <>
+                                                {girlCanJudge && !hasPlayedCard && (
+                                                    <button 
+                                                        onClick={handleGirlTrialStart}
+                                                        className="w-16 h-16 rounded-full bg-[#92400e] hover:bg-[#b45309] text-[#fef3c7] flex flex-col items-center justify-center shadow-xl border-2 border-[#78350f] hover:scale-105 transition-all animate-bounce"
+                                                    >
+                                                        <Scale className="w-6 h-6 mb-1" />
+                                                        <span className="text-[10px] font-bold">审判</span>
+                                                    </button>
+                                                )}
+
+                                                <button 
+                                                    disabled={hasPlayedCard}
+                                                    onClick={() => handleDrawCards(2, false, true)}
+                                                    className="w-16 h-16 rounded-full bg-[#292524] hover:bg-[#44403c] text-[#e6e0d4] flex flex-col items-center justify-center shadow-xl disabled:opacity-60 transition-all border-2 border-[#57534e] hover:scale-105"
+                                                >
+                                                    <Hand className="w-6 h-6 mb-1" />
+                                                    <span className="text-[10px]">摸牌</span>
+                                                </button>
+                                                
+                                                <button 
+                                                    disabled={!hasPlayedCard && me.hand.length > 0} 
+                                                    onClick={() => endTurn(players)}
+                                                    className="w-20 h-20 rounded-full bg-[#991b1b] hover:bg-[#b91c1c] text-[#f5f5f4] flex flex-col items-center justify-center shadow-xl disabled:opacity-60 transition-all border-2 border-[#7f1d1d] hover:scale-105"
+                                                >
+                                                    <X className="w-8 h-8 mb-1" />
+                                                    <span className="text-xs font-bold">结束回合</span>
+                                                </button>
+                                            </>
+                                        )
+                                    )}
+                            </div>
+                        </div>
+                        
+                        {(phase === Phase.NIGHT_WITCH && !amWitch) || (phase === Phase.NIGHT_CONSTABLE && !amConstable) || (phase === Phase.INITIAL_NIGHT && !amWitch) ? (
+                            <div className="fixed inset-0 bg-[#000000]/95 z-[200] flex items-center justify-center">
+                                <div className="text-center animate-pulse">
+                                    <Moon className="w-20 h-20 text-[#a855f7] mx-auto mb-4 opacity-80"/>
+                                    <h2 className="text-2xl font-serif text-[#e6e0d4] tracking-widest">
+                                        {phase === Phase.INITIAL_NIGHT ? '女巫请睁眼放黑猫...' : '天黑请闭眼...'}
+                                    </h2>
+                                </div>
+                            </div>
+                        ) : null}
+
+                    </div>
+                );
+            };
+
+            switch(view) {
+                case View.LANDING: return renderLanding();
+                case View.RULES: return renderRules();
+                case View.SETUP_HOST: return renderSetupHost();
+                case View.JOIN_ROOM: return renderJoinRoom();
+                case View.WAITING_ROOM: return renderWaitingRoom();
+                case View.CHAR_SELECT: return renderCharSelect();
+                case View.GAME: return renderGame();
+                default: return renderLanding();
+            }
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<SalemGame />);
     </script>
+<script type="module" src="/index.tsx"></script>
 </body>
 </html>
+    
