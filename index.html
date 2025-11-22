@@ -93,7 +93,7 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef } from 'react';
         import { createRoot } from 'react-dom/client';
-        import { Shield, Skull, Zap, Eye, Users, Moon, Gavel, Search, Lock, Heart, Home, Cat, RotateCcw, BookOpen, Play, Hand, X, Layers, Scale, Copy, Check, UserPlus, Crown, Volume2, Settings, Music, Link, Loader2, Info, Server, Wifi } from 'lucide-react';
+        import { Shield, Skull, Zap, Eye, Users, Moon, Gavel, Search, Lock, Heart, Home, Cat, RotateCcw, BookOpen, Play, Hand, X, Layers, Scale, Copy, Check, UserPlus, Crown, Volume2, Settings, Music, Link, Loader2, Info, Server, Wifi, AlertTriangle, Globe } from 'lucide-react';
 
         // --- Constants & Types ---
         
@@ -315,6 +315,38 @@
             );
         };
 
+        const HttpsHelpModal = ({ onClose }) => (
+            <div className="fixed inset-0 z-[400] bg-black/90 flex items-center justify-center p-4 backdrop-blur-md animate-fade-in">
+                <div className="bg-[#1c1917] p-6 rounded-lg shadow-2xl max-w-lg w-full border-2 border-red-800 relative">
+                    <button onClick={onClose} className="absolute top-2 right-2 text-[#a8a29e] hover:text-white p-1">
+                        <X />
+                    </button>
+                    <div className="text-center mb-4">
+                        <AlertTriangle className="w-16 h-16 text-red-600 mx-auto mb-2" />
+                        <h3 className="text-2xl font-black text-red-500 mb-1">连接被浏览器拦截!</h3>
+                        <p className="text-[#a8a29e] text-sm">Mixed Content Security Error</p>
+                    </div>
+                    
+                    <div className="text-[#e7e5e4] text-sm space-y-4 mb-6 leading-relaxed bg-[#292524] p-4 rounded border border-red-900/30">
+                        <p className="font-bold">原因：</p>
+                        <p>你正在访问 HTTPS 安全网页 (Github)，但试图连接 HTTP 不安全服务器 (阿里云 IP)。浏览器为了安全，默认拦截了这次连接。</p>
+                        
+                        <p className="font-bold border-t border-[#44403c] pt-2 mt-2">解决方法 (请点击浏览器地址栏)：</p>
+                        <ol className="list-decimal pl-5 space-y-2">
+                            <li>找到地址栏左侧（或右侧）的 <span className="inline-block px-1 bg-gray-700 rounded text-xs">🔒</span> 锁图标或 <span className="inline-block px-1 bg-gray-700 rounded text-xs">🛡️</span> 盾牌图标。</li>
+                            <li>点击它，找到 <strong>"网站设置"</strong> 或 <strong>"权限"</strong>。</li>
+                            <li>找到 <strong>"不安全的内容" (Insecure Content)</strong>，将其设置为 <strong>"允许" (Allow)</strong>。</li>
+                            <li>或者如果地址栏最右侧有 <span className="inline-block px-1 bg-gray-700 rounded text-xs">🚫</span> 拦截图标，点击它并选择 <strong>"加载不安全的脚本"</strong>。</li>
+                        </ol>
+                    </div>
+                    
+                    <button onClick={onClose} className="w-full py-3 bg-red-900 hover:bg-red-800 text-white font-bold rounded transition-colors">
+                        我明白了，我去试试
+                    </button>
+                </div>
+            </div>
+        );
+
         const SettingsModal = ({ onClose, volume, onVolumeChange, usePrivateNet, onTogglePrivateNet }) => {
             return (
                 <div className="fixed inset-0 z-[300] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
@@ -360,7 +392,7 @@
                                 </div>
                                 <p className="text-[#a8a29e] text-xs leading-relaxed">
                                     {usePrivateNet 
-                                        ? "当前配置：118.31.222.7 (Windows Server)。如连接失败，请检查服务器上的 Windows 防火墙是否开放 9000 端口。" 
+                                        ? "当前配置：118.31.222.7 (Windows Server)。如连接失败，请检查浏览器是否拦截了 HTTP 请求。" 
                                         : "当前配置：公共测试节点。速度较慢，仅供临时使用。"}
                                 </p>
                             </div>
@@ -390,8 +422,8 @@
                             <p className="mb-2 flex items-center gap-2"><strong className="text-[#b45309]">1. 连接问题急救指南</strong></p>
                             <p className="text-sm">如果你看到了 "Failed to fetch" 或无法创建房间：</p>
                             <ul className="text-sm mt-2 space-y-1 list-disc pl-5 text-[#e7e5e4]">
-                                <li><strong className="text-red-400">检查 Windows 防火墙</strong>：这是最常见的原因！必须在服务器的“Windows Defender 防火墙”入站规则中开放 9000 端口。</li>
-                                <li><strong>检查安全组</strong>：阿里云控制台的安全组是否放行了 TCP 9000？</li>
+                                <li><strong className="text-red-400">检查浏览器拦截</strong>：如果你在 Github (HTTPS) 上玩，浏览器会拦截阿里云 (HTTP)。请点击地址栏的“锁”或“盾牌”图标，允许“不安全内容”。</li>
+                                <li><strong className="text-red-400">检查防火墙</strong>：服务器的“Windows Defender 防火墙”必须开放 9000 端口。</li>
                                 <li><strong>检查服务程序</strong>：服务器上的黑色窗口（Node.js）不能关闭。</li>
                             </ul>
                         </div>
@@ -674,6 +706,7 @@
             const [girlTrialMode, setGirlTrialMode] = useState(false);
             const [isSettingsOpen, setIsSettingsOpen] = useState(false);
             const [isAnnouncementsOpen, setIsAnnouncementsOpen] = useState(false);
+            const [isHttpsHelpOpen, setIsHttpsHelpOpen] = useState(false);
             const [bgmVolume, setBgmVolume] = useState(0.5);
             
             // Night/Voting State
@@ -758,6 +791,14 @@
                 let newPeer;
 
                 if (usePrivateNet && ServerConfig.host) {
+                    // --- HTTPS Mixed Content Check ---
+                    if (window.location.protocol === 'https:' && ServerConfig.secure === false) {
+                        // User is on Github/Vercel (HTTPS) trying to connect to Alibaba IP (HTTP)
+                        // This will likely fail due to browser security blocking mixed content
+                        console.warn("Mixed Content Warning: Connecting from HTTPS to HTTP");
+                        // We continue, but if error occurs, we know why.
+                    }
+
                     // --- 私有阿里云服务器模式 ---
                     console.log("Connecting to Private Alibaba Cloud Server:", ServerConfig.host);
                     newPeer = new window.Peer(null, {
@@ -829,10 +870,17 @@
                     
                     if (err.type === 'peer-unavailable') msg = "找不到该房间或房主已离线";
                     else if (err.type === 'unavailable-id') msg = "ID已被占用，请刷新重试";
-                    else if (err.message && (err.message.includes("fetch") || err.message.includes("network"))) {
-                         msg = usePrivateNet 
-                            ? "连接失败！请检查：1.阿里云安全组端口9000 2.Windows防火墙入站规则 3.服务器黑窗口是否开着" 
-                            : "网络连接失败";
+                    else if (err.message && (err.message.includes("fetch") || err.message.includes("network") || err.type === 'server-error')) {
+                         
+                         // Detect Mixed Content Error specific scenario
+                         if (usePrivateNet && window.location.protocol === 'https:') {
+                             setIsHttpsHelpOpen(true); // TRIGGER THE HELP MODAL
+                             msg = "连接被浏览器拦截 (混合内容错误)";
+                         } else {
+                             msg = usePrivateNet 
+                                ? "连接失败！请检查防火墙端口 9000 是否开放" 
+                                : "网络连接失败";
+                         }
                     }
                     
                     showToast(`${msg} (${err.type || 'Error'})`, 8000);
@@ -2572,6 +2620,7 @@
                     {view === View.GAME && renderGame()}
                     {isSettingsOpen && <SettingsModal onClose={() => setIsSettingsOpen(false)} volume={bgmVolume} onVolumeChange={setBgmVolume} usePrivateNet={usePrivateNet} onTogglePrivateNet={togglePrivateNet} />}
                     {isAnnouncementsOpen && <AnnouncementsModal onClose={() => setIsAnnouncementsOpen(false)} />}
+                    {isHttpsHelpOpen && <HttpsHelpModal onClose={() => setIsHttpsHelpOpen(false)} />}
                     
                     <audio ref={audioRef} loop>
                         <source src="https://cdn.pixabay.com/download/audio/2022/10/28/audio_b91b666196.mp3" type="audio/mpeg" />
