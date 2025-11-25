@@ -1,520 +1,415 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>女巫镇 - 引导页面</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>女巫镇 - Witch Town</title>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- GSAP 动画库 -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              witch: {
+                900: '#0f0c29',
+                800: '#302b63',
+                700: '#24243e',
+                accent: '#a8edea',
+                gold: '#ffd700',
+              }
+            },
+            fontFamily: {
+              serif: ['Georgia', 'Cambria', '"Times New Roman"', 'Times', 'serif'],
+            },
+            animation: {
+              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'glow': 'glow 3s ease-in-out infinite alternate',
+            },
+            keyframes: {
+              glow: {
+                '0%': { textShadow: '0 0 10px rgba(168,85,247,0.2), 0 0 20px rgba(168,85,247,0.1)', opacity: '0.9' },
+                '100%': { textShadow: '0 0 25px rgba(168,85,247,0.9), 0 0 50px rgba(168,85,247,0.5)', opacity: '1' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- React, ReactDOM, Babel, GSAP -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#4a0878',
-                        secondary: '#0066cc',
-                        accent: '#cc0066',
-                        dark: '#0a0a1a',
-                        darker: '#050510',
-                        light: '#b0b0c0'
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                        serif: ['Playfair Display', 'Georgia', 'serif'],
-                    },
-                    animation: {
-                        'float': 'float 3s ease-in-out infinite',
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .text-shadow {
-                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-            }
-            .text-shadow-glow {
-                text-shadow: 0 0 10px rgba(106, 13, 173, 0.7), 0 0 20px rgba(106, 13, 173, 0.5);
-            }
-            .btn-hover {
-                @apply transition-all duration-300 transform hover:scale-105 hover:shadow-lg;
-            }
-            .modal-transition {
-                @apply transition-all duration-300 ease-in-out;
-            }
-            .glass-effect {
-                @apply bg-white/10 backdrop-blur-md border border-white/20;
-            }
-        }
-        
-        body {
-            background-color: theme('colors.darker');
-            background-image: url('https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/c14ea43e48cd45e4936a8f4b606ac163~tplv-a9rns2rl98-image.image?rcl=202511251758556FADEA4E67B2AF9A134D&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1766656768&x-signature=BZpwF%2B7oLlLBU8orDj2iogo1J7U%3D');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            min-height: 100vh;
-        }
-        
-        .btn-primary {
-            @apply bg-gradient-to-r from-[#4A4A4A] to-[#2D2D2D] text-white font-bold py-4 px-8 rounded-lg shadow-lg btn-hover border-2 border-[#6A6A6A] relative overflow-hidden;
-        }
-        
-        .btn-primary::before {
-            content: '';
-            @apply absolute inset-0 bg-gradient-to-r from-[#6A6A6A]/30 to-transparent transform -skew-x-12 translate-x-[-100%] transition-transform duration-700;
-        }
-        
-        .btn-primary:hover::before {
-            @apply translate-x-[100%];
-        }
-        
-        .btn-secondary {
-            @apply bg-gradient-to-r from-[#4A4A4A] to-[#2D2D2D] text-white font-bold py-4 px-8 rounded-lg shadow-lg btn-hover border-2 border-[#6A6A6A] relative overflow-hidden;
-        }
-        
-        .btn-secondary::before {
-            content: '';
-            @apply absolute inset-0 bg-gradient-to-r from-[#6A6A6A]/30 to-transparent transform -skew-x-12 translate-x-[-100%] transition-transform duration-700;
-        }
-        
-        .btn-secondary:hover::before {
-            @apply translate-x-[100%];
-        }
-        
-        .btn-tertiary {
-            @apply bg-gradient-to-r from-[#4A4A4A] to-[#2D2D2D] text-white font-bold py-4 px-8 rounded-lg shadow-lg btn-hover border-2 border-[#6A6A6A] relative overflow-hidden;
-        }
-        
-        .btn-tertiary::before {
-            content: '';
-            @apply absolute inset-0 bg-gradient-to-r from-[#6A6A6A]/30 to-transparent transform -skew-x-12 translate-x-[-100%] transition-transform duration-700;
-        }
-        
-        .btn-tertiary:hover::before {
-            @apply translate-x-[100%];
-        }
-        
-        .modal {
-            @apply fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none modal-transition;
-        }
-        
-        .modal.active {
-            @apply opacity-100 pointer-events-auto;
-        }
-        
-        .modal-content {
-            @apply w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl p-6 glass-effect shadow-2xl transform scale-95 modal-transition;
-        }
-        
-        .modal.active .modal-content {
-            @apply scale-100;
-        }
-        
-        .role-card {
-            @apply flex items-center p-4 rounded-lg glass-effect mb-4;
-        }
-        
-        .role-icon {
-            @apply w-16 h-16 mr-4 object-contain;
-        }
-        
-        .add-to-home {
-            @apply flex flex-col items-center p-4 rounded-lg glass-effect mb-4;
-        }
-        
-        .add-to-home-step {
-            @apply flex items-start mb-4;
-        }
-        
-        .step-number {
-            @apply flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white mr-3 flex-shrink-0;
-        }
+
+    <style>
+      body {
+        background-color: #0f0c29;
+        color: white;
+        overflow: hidden; /* Prevent scrolling */
+        margin: 0;
+      }
+      /* Custom scrollbar for modals */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.3);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #4c1d95; 
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #6d28d9; 
+      }
     </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "gsap": "https://aistudiocdn.com/gsap@^3.13.0"
+  }
+}
+</script>
 </head>
-<body class="font-sans text-light">
-    <!-- 横屏提示 (默认显示) -->
-    <div id="orientationNotice" class="fixed inset-0 flex flex-col items-center justify-center bg-black/90 z-50">
-        <div class="text-center p-8 max-w-md">
-            <i class="fa fa-exclamation-triangle text-red-600 text-6xl mb-6 animate-pulse"></i>
-            <h2 class="text-3xl font-bold text-white mb-4">请将手机横屏！</h2>
-            <p class="text-lg text-gray-300">为了获得最佳游戏体验，请将您的设备横屏后再继续。如果你是用微信打开的网站请点击右上角三个点，选择用默认浏览器打开。</p>
-        </div>
-    </div>
+  <body>
+    <div id="root"></div>
 
-    <!-- 页面容器 (默认隐藏，横屏后显示) -->
-    <div id="mainContent" class="container mx-auto px-4 py-12 flex flex-col items-center justify-center min-h-screen hidden">
-        
-        <!-- 游戏标题 -->
-        <div class="text-center mb-12">
-            <h1 class="text-4xl md:text-5xl font-serif font-medium mb-4 text-white text-shadow">
-                女巫镇
-            </h1>
-            <p class="text-base md:text-lg text-shadow">1692年的塞勒姆，充满了谎言和欺骗...</p>
-        </div>
-        
-        <!-- 按钮容器 -->
-        <div class="flex flex-col md:flex-row flex-wrap justify-center gap-4 w-full max-w-4xl">
-            <button id="startGameBtn" class="btn-primary text-lg md:text-xl flex items-center justify-center flex-1 min-w-[200px]">
-                <i class="fa fa-play-circle mr-2"></i> 开始游戏
-            </button>
-            
-            <button id="installBtn" class="btn-secondary text-lg md:text-xl flex items-center justify-center flex-1 min-w-[200px]">
-                <i class="fa fa-download mr-2"></i> 安装到手机桌面
-            </button>
-            
-            <button id="noticeBtn" class="btn-tertiary text-lg md:text-xl flex items-center justify-center flex-1 min-w-[200px]">
-                <i class="fa fa-bullhorn mr-2"></i> 小镇告示栏
-            </button>
-        </div>
-    </div>
-    
+    <script type="text/babel">
+      const { useState, useEffect, useRef, useLayoutEffect } = React;
 
-    
-    <!-- 安装到手机桌面模态框 -->
-    <div id="installModal" class="modal">
-        <div class="absolute inset-0 bg-black/70" id="installOverlay"></div>
-        <div class="modal-content relative z-10">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-3xl font-bold text-shadow-glow">安装到手机桌面</h2>
-                <button id="closeInstallBtn" class="text-2xl hover:text-accent transition-colors">
-                    <i class="fa fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="space-y-6">
-                <p class="mb-4">将《女巫镇》安装到您的手机桌面，随时畅玩！</p>
-                
-                <div class="space-y-4">
-                    <h3 class="text-xl font-bold text-secondary">iOS 设备</h3>
-                    <div class="add-to-home">
-                        <div class="add-to-home-step">
-                            <div class="step-number">1</div>
-                            <div>
-                                <p>打开 Safari 浏览器，访问本页面</p>
-                            </div>
-                        </div>
-                        <div class="add-to-home-step">
-                            <div class="step-number">2</div>
-                            <div>
-                                <p>点击底部的 "分享" 按钮</p>
-                            </div>
-                        </div>
-                        <div class="add-to-home-step">
-                            <div class="step-number">3</div>
-                            <div>
-                                <p>选择 "添加到主屏幕"</p>
-                            </div>
-                        </div>
-                        <div class="add-to-home-step">
-                            <div class="step-number">4</div>
-                            <div>
-                                <p>点击 "添加" 完成</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="space-y-4">
-                    <h3 class="text-xl font-bold text-secondary">Android 设备</h3>
-                    <div class="add-to-home">
-                        <div class="add-to-home-step">
-                            <div class="step-number">1</div>
-                            <div>
-                                <p>打开 Chrome 浏览器，访问本页面</p>
-                            </div>
-                        </div>
-                        <div class="add-to-home-step">
-                            <div class="step-number">2</div>
-                            <div>
-                                <p>点击右上角的 "菜单" 按钮</p>
-                            </div>
-                        </div>
-                        <div class="add-to-home-step">
-                            <div class="step-number">3</div>
-                            <div>
-                                <p>选择 "添加到主屏幕" 或 "安装应用"</p>
-                            </div>
-                        </div>
-                        <div class="add-to-home-step">
-                            <div class="step-number">4</div>
-                            <div>
-                                <p>点击 "添加" 完成</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="text-center mt-6">
-                    <p class="text-lg font-bold text-accent">安装完成后，您可以直接从手机桌面启动《女巫镇》！</p>
-                </div>
-            </div>
+      // --- Constants ---
+      const GAME_URL = "http://118.31.222.7:8000/";
+      
+      const BULLETIN_CONTENT = `感谢小镇改良家们！
+
+特别致谢坤坤先生、薇薇小姐、李源琦大王、煎饼女士、昊昊先生、洋秘女士、美女丁小姐、平凡老师 —— 是你们化身 “bug 猎手”，扫清《女巫镇》里的潜藏隐患，用细致反馈为小镇的完美呈现保驾护航，由衷感谢每一份鼎力支持！
+
+小镇的迷雾依旧存在，期待未来继续与你们一同打磨，让小镇变得更加美好！`;
+
+      const INSTALL_GUIDE = {
+        ios: "1. 点击浏览器底部中间的分享按钮。\n2. 在弹出的菜单中向下滑动，找到并点击“添加到主屏幕”。\n3. 点击右上角的“添加”。",
+        android: "1. 点击浏览器右上角的三个点菜单。\n2. 找到“安装应用”或“添加到主屏幕”。\n3. 按照提示确认添加。",
+        general: "将网站添加到桌面，获得类似原生App的全屏游戏体验。"
+      };
+
+      const WECHAT_WARNING = "检测到您正在使用微信访问。\n为了保证游戏体验，建议点击右上角三个点 (...)，选择“在浏览器打开”。";
+
+      // --- Components ---
+
+      // Background Component
+      const Background = () => (
+        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e]"></div>
+          <div className="absolute inset-0 bg-black opacity-10 mix-blend-overlay"></div>
+          {/* Orbs */}
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-600/20 rounded-full blur-[80px] animate-pulse-slow delay-1000"></div>
+          {/* Vignette */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.8)_100%)]"></div>
         </div>
-    </div>
-    
-    <!-- 小镇告示栏模态框 -->
-    <div id="noticeModal" class="modal">
-        <div class="absolute inset-0 bg-black/70" id="noticeOverlay"></div>
-        <div class="modal-content relative z-10">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-3xl font-bold text-shadow-glow">小镇告示栏</h2>
-                <button id="closeNoticeBtn" class="text-2xl hover:text-accent transition-colors">
-                    <i class="fa fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="space-y-6">
-                <div class="glass-effect p-6 rounded-xl">
-                    <p class="text-lg mb-4">感谢小镇改良家们！</p>
-                    <p class="text-base mb-6">特别致谢坤坤先生、薇薇小姐、李源琦大王、煎饼女士、昊昊先生、洋秘女士、美女丁小姐、平凡老师 —— 是你们化身 "bug 猎手"，扫清《女巫镇》里的潜藏隐患，用细致反馈为小镇的完美呈现保驾护航，由衷感谢每一份鼎力支持！</p>
-                    <p class="text-base">小镇的迷雾依旧存在，期待未来继续与你们一同打磨，让小镇变得更加美好！</p>
-                </div>
-                
-                <div class="text-center mt-4">
-                    <p class="text-light/70">女巫镇全体居民敬上</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <script>
-        // 页面加载完成后执行
-        document.addEventListener('DOMContentLoaded', function() {
-            // 检测屏幕方向并显示相应内容
-            function checkOrientation() {
-                const orientationNotice = document.getElementById('orientationNotice');
-                const mainContent = document.getElementById('mainContent');
-                
-                // 检查窗口宽高比，大于1表示横屏
-                if (window.innerWidth / window.innerHeight > 1) {
-                    orientationNotice.classList.add('hidden');
-                    mainContent.classList.remove('hidden');
-                } else {
-                    orientationNotice.classList.remove('hidden');
-                    mainContent.classList.add('hidden');
-                }
-            }
-            
-            // 初始检查
-            checkOrientation();
-            
-            // 监听窗口大小变化和方向变化
-            window.addEventListener('resize', checkOrientation);
-            window.addEventListener('orientationchange', checkOrientation);
-            // 获取按钮和模态框元素
-            const startGameBtn = document.getElementById('startGameBtn');
-            const gameRulesBtn = document.getElementById('gameRulesBtn');
-            const installBtn = document.getElementById('installBtn');
-            const noticeBtn = document.getElementById('noticeBtn');
-            
-            const gameRulesModal = document.getElementById('gameRulesModal');
-            const installModal = document.getElementById('installModal');
-            const noticeModal = document.getElementById('noticeModal');
-            
-            const closeRulesBtn = document.getElementById('closeRulesBtn');
-            const closeInstallBtn = document.getElementById('closeInstallBtn');
-            const closeNoticeBtn = document.getElementById('closeNoticeBtn');
-            
-            const gameRulesOverlay = document.getElementById('gameRulesOverlay');
-            const installOverlay = document.getElementById('installOverlay');
-            const noticeOverlay = document.getElementById('noticeOverlay');
-            
-            // 开始游戏按钮点击事件
-            startGameBtn.addEventListener('click', function() {
-                // 添加点击动画效果
-                gsap.to(startGameBtn, {
-                    scale: 0.95,
-                    duration: 0.1,
-                    onComplete: function() {
-                        gsap.to(startGameBtn, {
-                            scale: 1,
-                            duration: 0.1,
-                            onComplete: function() {
-                                // 跳转到游戏链接
-                                window.location.href = 'http://118.31.222.7:8000/';
-                            }
-                        });
-                    }
-                });
+      );
+
+      // Modal Component
+      const Modal = ({ isOpen, onClose, title, children }) => {
+        const overlayRef = useRef(null);
+        const contentRef = useRef(null);
+
+        useEffect(() => {
+          if (isOpen) {
+            gsap.to(overlayRef.current, {
+              opacity: 1,
+              duration: 0.3,
+              display: 'flex',
+              ease: 'power2.out'
             });
-            
-            // 游戏规则按钮点击事件
-            gameRulesBtn.addEventListener('click', function() {
-                // 添加点击动画效果
-                gsap.to(gameRulesBtn, {
-                    scale: 0.95,
-                    duration: 0.1,
-                    onComplete: function() {
-                        gsap.to(gameRulesBtn, {
-                            scale: 1,
-                            duration: 0.1,
-                            onComplete: function() {
-                                // 显示游戏规则模态框
-                                gameRulesModal.classList.add('active');
-                                // 添加淡入动画
-                                gsap.fromTo(gameRulesModal.querySelector('.modal-content'), 
-                                    { opacity: 0, y: 20 },
-                                    { opacity: 1, y: 0, duration: 0.3 }
-                                );
-                            }
-                        });
-                    }
-                });
-            });
-            
-            // 安装到手机桌面按钮点击事件
-            installBtn.addEventListener('click', function() {
-                // 添加点击动画效果
-                gsap.to(installBtn, {
-                    scale: 0.95,
-                    duration: 0.1,
-                    onComplete: function() {
-                        gsap.to(installBtn, {
-                            scale: 1,
-                            duration: 0.1,
-                            onComplete: function() {
-                                // 显示安装模态框
-                                installModal.classList.add('active');
-                                // 添加淡入动画
-                                gsap.fromTo(installModal.querySelector('.modal-content'), 
-                                    { opacity: 0, y: 20 },
-                                    { opacity: 1, y: 0, duration: 0.3 }
-                                );
-                            }
-                        });
-                    }
-                });
-            });
-            
-            // 小镇告示栏按钮点击事件
-            noticeBtn.addEventListener('click', function() {
-                // 添加点击动画效果
-                gsap.to(noticeBtn, {
-                    scale: 0.95,
-                    duration: 0.1,
-                    onComplete: function() {
-                        gsap.to(noticeBtn, {
-                            scale: 1,
-                            duration: 0.1,
-                            onComplete: function() {
-                                // 显示告示栏模态框
-                                noticeModal.classList.add('active');
-                                // 添加淡入动画
-                                gsap.fromTo(noticeModal.querySelector('.modal-content'), 
-                                    { opacity: 0, y: 20 },
-                                    { opacity: 1, y: 0, duration: 0.3 }
-                                );
-                            }
-                        });
-                    }
-                });
-            });
-            
-            // 关闭游戏规则模态框
-            function closeGameRulesModal() {
-                // 添加淡出动画
-                gsap.fromTo(gameRulesModal.querySelector('.modal-content'), 
-                    { opacity: 1, y: 0 },
-                    { opacity: 0, y: 20, duration: 0.3, onComplete: function() {
-                        gameRulesModal.classList.remove('active');
-                    }}
-                );
-            }
-            
-            // 关闭安装模态框
-            function closeInstallModal() {
-                // 添加淡出动画
-                gsap.fromTo(installModal.querySelector('.modal-content'), 
-                    { opacity: 1, y: 0 },
-                    { opacity: 0, y: 20, duration: 0.3, onComplete: function() {
-                        installModal.classList.remove('active');
-                    }}
-                );
-            }
-            
-            // 关闭告示栏模态框
-            function closeNoticeModal() {
-                // 添加淡出动画
-                gsap.fromTo(noticeModal.querySelector('.modal-content'), 
-                    { opacity: 1, y: 0 },
-                    { opacity: 0, y: 20, duration: 0.3, onComplete: function() {
-                        noticeModal.classList.remove('active');
-                    }}
-                );
-            }
-            
-            // 绑定关闭按钮事件
-            closeRulesBtn.addEventListener('click', closeGameRulesModal);
-            closeInstallBtn.addEventListener('click', closeInstallModal);
-            closeNoticeBtn.addEventListener('click', closeNoticeModal);
-            
-            // 点击遮罩层关闭模态框
-            gameRulesOverlay.addEventListener('click', closeGameRulesModal);
-            installOverlay.addEventListener('click', closeInstallModal);
-            noticeOverlay.addEventListener('click', closeNoticeModal);
-            
-            // 阻止模态框内容点击事件冒泡
-            gameRulesModal.querySelector('.modal-content').addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-            
-            installModal.querySelector('.modal-content').addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-            
-            noticeModal.querySelector('.modal-content').addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-            
-            // 添加键盘事件，ESC键关闭模态框
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    if (gameRulesModal.classList.contains('active')) {
-                        closeGameRulesModal();
-                    }
-                    if (installModal.classList.contains('active')) {
-                        closeInstallModal();
-                    }
-                    if (noticeModal.classList.contains('active')) {
-                        closeNoticeModal();
-                    }
-                }
-            });
-            
-            // 添加页面加载动画
-            gsap.fromTo('.container > *', 
-                { opacity: 0, y: 30 },
-                { opacity: 1, y: 0, duration: 0.8, stagger: 0.2, ease: 'power3.out' }
+            gsap.fromTo(contentRef.current, 
+              { scale: 0.8, opacity: 0, y: 20 },
+              { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: 'back.out(1.7)' }
             );
-            
-            // 添加按钮悬停效果
-            const buttons = document.querySelectorAll('button');
-            buttons.forEach(button => {
-                button.addEventListener('mouseenter', function() {
-                    gsap.to(this, { scale: 1.05, duration: 0.2 });
-                });
-                
-                button.addEventListener('mouseleave', function() {
-                    gsap.to(this, { scale: 1, duration: 0.2 });
-                });
+          } else {
+            gsap.to(overlayRef.current, {
+              opacity: 0,
+              duration: 0.2,
+              display: 'none',
+              ease: 'power2.in'
             });
-        });
+          }
+        }, [isOpen]);
+
+        return (
+          <div 
+            ref={overlayRef}
+            className="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+            onClick={onClose}
+          >
+            <div 
+              ref={contentRef}
+              className="w-full max-w-lg bg-slate-900 border border-purple-500/50 rounded-xl shadow-[0_0_30px_rgba(139,92,246,0.3)] overflow-hidden relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="bg-gradient-to-r from-purple-900 to-slate-900 p-4 border-b border-purple-500/30 flex justify-between items-center">
+                <h2 className="text-xl font-bold text-purple-100 font-serif tracking-wide">{title}</h2>
+                <button 
+                  onClick={onClose}
+                  className="text-purple-300 hover:text-white transition-colors text-2xl leading-none"
+                >
+                  &times;
+                </button>
+              </div>
+              <div className="p-6 text-purple-100/90 leading-relaxed whitespace-pre-line max-h-[60vh] overflow-y-auto">
+                {children}
+              </div>
+              <div className="h-1 w-full bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-50"></div>
+            </div>
+          </div>
+        );
+      };
+
+      // OrientationGuard Component
+      const OrientationGuard = ({ isLandscape, isWeChat }) => {
+        const containerRef = useRef(null);
+        const iconRef = useRef(null);
+
+        useEffect(() => {
+          if (!isLandscape && containerRef.current) {
+            const ctx = gsap.context(() => {
+              gsap.to(iconRef.current, {
+                rotation: -90,
+                duration: 1.5,
+                repeat: -1,
+                repeatDelay: 0.5,
+                ease: "power2.inOut",
+                yoyo: true
+              });
+            }, containerRef);
+            return () => ctx.revert();
+          }
+        }, [isLandscape]);
+
+        if (isLandscape) return null;
+
+        return (
+          <div 
+            ref={containerRef}
+            className="fixed inset-0 z-[100] bg-slate-950 flex flex-col items-center justify-center p-8 text-center"
+          >
+            <div className="mb-8" ref={iconRef}>
+              <svg width="80" height="140" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400">
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                <line x1="12" y1="18" x2="12.01" y2="18"></line>
+              </svg>
+            </div>
+            
+            <h2 className="text-2xl font-bold text-white mb-4">请将手机横屏</h2>
+            <p className="text-purple-200 mb-6">《女巫镇》需要横屏游玩以获得最佳体验。</p>
+
+            {isWeChat && (
+              <div className="bg-yellow-900/40 border border-yellow-600/50 p-4 rounded-lg max-w-sm mt-4 animate-pulse">
+                 <p className="text-yellow-200 text-sm font-medium">
+                   ⚠️ 微信浏览器提示
+                 </p>
+                 <p className="text-yellow-100/80 text-sm mt-1 text-left">
+                   {WECHAT_WARNING}
+                 </p>
+              </div>
+            )}
+          </div>
+        );
+      };
+
+      // Button Component
+      const Btn = ({ onClick, primary, children }) => (
+        <button
+          onClick={onClick}
+          className={`
+            group relative px-4 py-3 md:px-8 md:py-4 rounded-lg font-bold text-sm md:text-lg tracking-wider uppercase transition-all duration-300
+            overflow-hidden transform hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] flex-1 min-w-[120px] max-w-[240px]
+            ${primary 
+              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white border border-purple-400' 
+              : 'bg-black/40 backdrop-blur-sm border border-purple-500/50 text-purple-100 hover:bg-purple-900/30'}
+          `}
+        >
+          <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+          <span className="relative z-10 flex items-center justify-center gap-2">
+            {children}
+          </span>
+        </button>
+      );
+
+      // LandingPage Component
+      const LandingPage = ({ setModal }) => {
+        const containerRef = useRef(null);
+        const titleRef = useRef(null);
+        const buttonsRef = useRef(null);
+
+        useLayoutEffect(() => {
+          const ctx = gsap.context(() => {
+            gsap.from(titleRef.current, {
+              y: -50,
+              opacity: 0,
+              duration: 1.5,
+              ease: "power3.out"
+            });
+
+            if (buttonsRef.current) {
+              gsap.from(buttonsRef.current.children, {
+                y: 30,
+                opacity: 0,
+                duration: 0.8,
+                stagger: 0.1,
+                ease: "back.out(1.7)",
+                delay: 0.5
+              });
+            }
+          }, containerRef);
+
+          return () => ctx.revert();
+        }, []);
+
+        const handleStartGame = () => {
+          window.location.href = GAME_URL;
+        };
+
+        return (
+          <div ref={containerRef} className="relative z-10 flex flex-col items-center justify-center min-h-screen w-full px-4">
+            
+            {/* Title Section */}
+            <div className="mb-12 text-center">
+              <h1 
+                ref={titleRef}
+                className="text-6xl md:text-8xl font-serif font-black text-transparent bg-clip-text bg-gradient-to-b from-purple-200 via-purple-400 to-purple-800 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] animate-glow"
+              >
+                女巫镇
+              </h1>
+              <p className="mt-6 text-purple-200/90 text-sm md:text-base tracking-widest font-light border-t border-purple-500/30 pt-4 max-w-lg mx-auto">
+                迷雾散去，小镇迎来了它的第一波客人...
+              </p>
+            </div>
+
+            {/* Buttons Section - Horizontal Layout */}
+            <div ref={buttonsRef} className="flex flex-row gap-4 md:gap-8 w-full max-w-4xl justify-center items-stretch">
+              
+              <Btn onClick={handleStartGame} primary>
+                <svg className="w-5 h-5 md:w-6 md:h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span className="hidden md:inline">开始游戏</span>
+                <span className="md:hidden">开始</span>
+              </Btn>
+
+              <Btn onClick={() => setModal('INSTALL')}>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span className="hidden md:inline">安装到桌面</span>
+                <span className="md:hidden">安装</span>
+              </Btn>
+
+              <Btn onClick={() => setModal('BULLETIN')}>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
+                <span className="hidden md:inline">小镇告示栏</span>
+                <span className="md:hidden">公告</span>
+              </Btn>
+
+            </div>
+            
+            <div className="absolute bottom-4 text-purple-500/30 text-xs font-mono">
+              v1.0.0 | Witch Town Productions
+            </div>
+          </div>
+        );
+      };
+
+      // App Component
+      const App = () => {
+        const [modalType, setModalType] = useState('NONE');
+        const [isLandscape, setIsLandscape] = useState(true);
+        const [isWeChat, setIsWeChat] = useState(false);
+
+        useEffect(() => {
+          // Check WeChat
+          const ua = navigator.userAgent.toLowerCase();
+          setIsWeChat(/micromessenger/.test(ua));
+
+          // Check Orientation
+          const checkOrientation = () => {
+            const mql = window.matchMedia("(orientation: landscape)");
+            const isLandscapeView = mql.matches || window.innerWidth > window.innerHeight;
+            setIsLandscape(isLandscapeView);
+          };
+
+          checkOrientation();
+          window.addEventListener('resize', checkOrientation);
+          window.addEventListener('orientationchange', checkOrientation);
+
+          return () => {
+            window.removeEventListener('resize', checkOrientation);
+            window.removeEventListener('orientationchange', checkOrientation);
+          };
+        }, []);
+
+        const closeModal = () => setModalType('NONE');
+
+        return (
+          <div className="relative w-full h-screen overflow-hidden font-sans select-none">
+            <Background />
+            
+            {/* Main Content (only visible if landscape) */}
+            <div className={!isLandscape ? 'hidden' : 'block h-full w-full'}>
+              <LandingPage setModal={setModalType} />
+            </div>
+
+            {/* Orientation Guard (visible if portrait) */}
+            <OrientationGuard isLandscape={isLandscape} isWeChat={isWeChat} />
+
+            {/* Modals */}
+            <Modal 
+              isOpen={modalType === 'BULLETIN'} 
+              onClose={closeModal} 
+              title="📜 小镇告示栏"
+            >
+              <div className="text-lg text-justify font-serif text-purple-200">
+                {BULLETIN_CONTENT}
+              </div>
+            </Modal>
+
+            <Modal 
+              isOpen={modalType === 'INSTALL'} 
+              onClose={closeModal} 
+              title="📱 安装到手机桌面"
+            >
+              <div className="space-y-6">
+                <p className="text-sm text-purple-300 italic mb-4 border-b border-purple-500/30 pb-2">
+                  {INSTALL_GUIDE.general}
+                </p>
+                
+                <div className="bg-purple-900/20 p-4 rounded-lg border border-purple-500/20">
+                  <h3 className="font-bold text-white mb-2 flex items-center gap-2">
+                    <span className="text-xl">🍎</span> iOS (Safari)
+                  </h3>
+                  <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
+                    {INSTALL_GUIDE.ios}
+                  </p>
+                </div>
+
+                <div className="bg-purple-900/20 p-4 rounded-lg border border-purple-500/20">
+                  <h3 className="font-bold text-white mb-2 flex items-center gap-2">
+                    <span className="text-xl">🤖</span> Android (Chrome)
+                  </h3>
+                  <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
+                    {INSTALL_GUIDE.android}
+                  </p>
+                </div>
+              </div>
+            </Modal>
+          </div>
+        );
+      };
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
     </script>
-</body>
+  </body>
 </html>
