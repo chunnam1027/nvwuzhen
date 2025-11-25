@@ -2,9 +2,17 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>女巫镇 - Witch Town</title>
     
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0f0c29" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="女巫镇" />
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3063/3063212.png" />
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -82,6 +90,21 @@
 </head>
   <body>
     <div id="root"></div>
+
+    <script>
+      // Register Service Worker for PWA
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(registration => {
+              console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            })
+            .catch(err => {
+              console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+      }
+    </script>
 
     <script type="text/babel">
       const { useState, useEffect, useRef, useLayoutEffect } = React;
@@ -246,7 +269,7 @@
       );
 
       // LandingPage Component
-      const LandingPage = ({ setModal }) => {
+      const LandingPage = ({ setModal, handleInstallClick }) => {
         const containerRef = useRef(null);
         const titleRef = useRef(null);
         const buttonsRef = useRef(null);
@@ -283,7 +306,6 @@
         };
 
         return (
-          // Adjusted layout: Removed pb-32, used overflow-y-auto on body, added negative margin top to shift content up
           <div ref={containerRef} className="relative z-10 flex flex-col items-center justify-center min-h-screen w-full px-4 -mt-20">
             
             {/* Title Section */}
@@ -308,7 +330,7 @@
                 <span className="md:hidden">开始</span>
               </Btn>
 
-              <Btn onClick={() => setModal('INSTALL')}>
+              <Btn onClick={handleInstallClick}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 <span className="hidden md:inline">安装到桌面</span>
                 <span className="md:hidden">安装</span>
@@ -334,6 +356,7 @@
         const [modalType, setModalType] = useState('NONE');
         const [isLandscape, setIsLandscape] = useState(true);
         const [isWeChat, setIsWeChat] = useState(false);
+        const [installPrompt, setInstallPrompt] = useState(null);
 
         useEffect(() => {
           // Check WeChat
@@ -351,13 +374,45 @@
           window.addEventListener('resize', checkOrientation);
           window.addEventListener('orientationchange', checkOrientation);
 
+          // PWA Install Prompt Listener
+          const handleBeforeInstallPrompt = (e) => {
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            setInstallPrompt(e);
+            console.log("Captured PWA install prompt event");
+          };
+
+          window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
           return () => {
             window.removeEventListener('resize', checkOrientation);
             window.removeEventListener('orientationchange', checkOrientation);
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
           };
         }, []);
 
         const closeModal = () => setModalType('NONE');
+
+        // Intelligent Install Handler
+        const handleInstallClick = () => {
+          if (installPrompt) {
+            // Trigger native prompt
+            installPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            installPrompt.userChoice.then((choiceResult) => {
+              if (choiceResult.outcome === 'accepted') {
+                console.log('User accepted the A2HS prompt');
+              } else {
+                console.log('User dismissed the A2HS prompt');
+              }
+              setInstallPrompt(null);
+            });
+          } else {
+            // Fallback to instructions (iOS or Desktop where not supported/already installed)
+            setModalType('INSTALL');
+          }
+        };
 
         return (
           <div className="relative w-full h-full min-h-screen font-sans select-none">
@@ -365,7 +420,7 @@
             
             {/* Main Content (only visible if landscape) */}
             <div className={!isLandscape ? 'hidden' : 'block w-full'}>
-              <LandingPage setModal={setModalType} />
+              <LandingPage setModal={setModalType} handleInstallClick={handleInstallClick} />
             </div>
 
             {/* Orientation Guard (visible if portrait) */}
