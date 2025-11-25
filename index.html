@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>女巫镇 - 引导页面</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- GSAP 动画库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4a0878',
+                        secondary: '#0066cc',
+                        accent: '#cc0066',
+                        dark: '#0a0a1a',
+                        darker: '#050510',
+                        light: '#b0b0c0'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            }
+            .text-shadow-glow {
+                text-shadow: 0 0 10px rgba(106, 13, 173, 0.7), 0 0 20px rgba(106, 13, 173, 0.5);
+            }
+            .btn-hover {
+                @apply transition-all duration-300 transform hover:scale-105 hover:shadow-lg;
+            }
+            .modal-transition {
+                @apply transition-all duration-300 ease-in-out;
+            }
+            .glass-effect {
+                @apply bg-white/10 backdrop-blur-md border border-white/20;
+            }
+        }
+        
+        body {
+            background-color: theme('colors.darker');
+            background-image: url('https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/8637e7dd2cd64dec977f26c4e71f4faf~tplv-a9rns2rl98-image.image?rcl=202511251736347A7B4A580931B066B70A&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1766655432&x-signature=5SH6ORX6B%2BbY6Wkedq1HPjqOzcc%3D');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        
+        .btn-primary {
+            @apply bg-gradient-to-r from-primary to-secondary text-white font-bold py-4 px-8 rounded-full shadow-lg btn-hover;
+        }
+        
+        .btn-secondary {
+            @apply bg-gradient-to-r from-secondary to-accent text-white font-bold py-4 px-8 rounded-full shadow-lg btn-hover;
+        }
+        
+        .btn-tertiary {
+            @apply bg-gradient-to-r from-accent to-primary text-white font-bold py-4 px-8 rounded-full shadow-lg btn-hover;
+        }
+        
+        .btn-quaternary {
+            @apply bg-gradient-to-r from-dark to-darker text-light font-bold py-4 px-8 rounded-full shadow-lg btn-hover border border-primary/30;
+        }
+        
+        .modal {
+            @apply fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none modal-transition;
+        }
+        
+        .modal.active {
+            @apply opacity-100 pointer-events-auto;
+        }
+        
+        .modal-content {
+            @apply w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl p-6 glass-effect shadow-2xl transform scale-95 modal-transition;
+        }
+        
+        .modal.active .modal-content {
+            @apply scale-100;
+        }
+        
+        .role-card {
+            @apply flex items-center p-4 rounded-lg glass-effect mb-4;
+        }
+        
+        .role-icon {
+            @apply w-16 h-16 mr-4 object-contain;
+        }
+        
+        .add-to-home {
+            @apply flex flex-col items-center p-4 rounded-lg glass-effect mb-4;
+        }
+        
+        .add-to-home-step {
+            @apply flex items-start mb-4;
+        }
+        
+        .step-number {
+            @apply flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white mr-3 flex-shrink-0;
+        }
+    </style>
+</head>
+<body class="font-sans text-light">
+    <!-- 页面容器 -->
+    <div class="container mx-auto px-4 py-12 flex flex-col items-center justify-center min-h-screen">
+        <!-- 横屏提示 -->
+        <div class="fixed top-4 left-0 right-0 flex justify-center z-40">
+            <div class="bg-red-800/80 backdrop-blur-sm px-6 py-2 rounded-full shadow-lg animate-pulse-slow">
+                <p class="text-white font-bold flex items-center">
+                    <i class="fa fa-exclamation-triangle mr-2"></i>
+                    请将手机横屏过来！
+                </p>
+            </div>
+        </div>
+        
+        <!-- 游戏标题 -->
+        <div class="text-center mb-12 animate-float">
+            <h1 class="text-5xl md:text-7xl font-bold mb-4 text-shadow-glow">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+                    女巫镇
+                </span>
+            </h1>
+            <p class="text-xl md:text-2xl text-shadow">在女巫镇中找出隐藏的女巫，保护平民安全</p>
+        </div>
+        
+        <!-- 按钮容器 -->
+        <div class="flex flex-col items-center space-y-6 w-full max-w-md">
+            <button id="startGameBtn" class="btn-primary w-full text-lg md:text-xl flex items-center justify-center">
+                <i class="fa fa-play-circle mr-2"></i> 开始游戏
+            </button>
+            
+            <button id="gameRulesBtn" class="btn-secondary w-full text-lg md:text-xl flex items-center justify-center">
+                <i class="fa fa-book mr-2"></i> 游戏规则
+            </button>
+            
+            <button id="installBtn" class="btn-tertiary w-full text-lg md:text-xl flex items-center justify-center">
+                <i class="fa fa-download mr-2"></i> 安装到手机桌面
+            </button>
+            
+            <button id="noticeBtn" class="btn-quaternary w-full text-lg md:text-xl flex items-center justify-center">
+                <i class="fa fa-bullhorn mr-2"></i> 小镇告示栏
+            </button>
+        </div>
+    </div>
+    
+    <!-- 游戏规则模态框 -->
+    <div id="gameRulesModal" class="modal">
+        <div class="absolute inset-0 bg-black/70" id="gameRulesOverlay"></div>
+        <div class="modal-content relative z-10">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold text-shadow-glow">游戏规则</h2>
+                <button id="closeRulesBtn" class="text-2xl hover:text-accent transition-colors">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-xl font-bold mb-2 text-secondary">基本规则</h3>
+                    <p class="mb-4">给怀疑的人打7张X，就可以翻对方一张身份牌。翻出女巫牌，平民就获胜；杀了所有平民，女巫就获胜。</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold mb-2 text-secondary">角色介绍</h3>
+                    
+                    <div class="role-card">
+                        <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/defe8fe0b4b5410cb5624f7221c63ecc~tplv-a9rns2rl98-image.image?rcl=20251125173224C582E5EE3DCB79D11D1B&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1766655175&x-signature=GvoLZsUI6YhlLHsILNko5KygSQs%3D" alt="女巫" class="role-icon">
+                        <div>
+                            <h4 class="font-bold text-lg">女巫</h4>
+                            <p>隐藏在平民中的反派角色，目标是传染所有平民或杀死所有平民。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="role-card">
+                        <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/a33d85ae2ac2425bb6f500050dc0e572~tplv-a9rns2rl98-image.image?rcl=20251125173224C582E5EE3DCB79D11D1B&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1766655175&x-signature=%2BV34Uc1iJrNZp9oT0%2Bj0SGdf0rM%3D" alt="平民" class="role-icon">
+                        <div>
+                            <h4 class="font-bold text-lg">平民</h4>
+                            <p>普通角色，需要通过推理找出隐藏的女巫，保护自己不被传染。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="role-card">
+                        <img src="https://p9-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/84a1e0cc6eae4733b7c3dfa1aa88d469~tplv-a9rns2rl98-image.image?rcl=20251125173224C582E5EE3DCB79D11D1B&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1766655176&x-signature=pqvzX30wuhwYIXpB0p2m4f6gWx4%3D" alt="警长" class="role-icon">
+                        <div>
+                            <h4 class="font-bold text-lg">警长</h4>
+                            <p>特殊平民角色，可以在夜里保护一个玩家不会被杀死。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold mb-2 text-secondary">特殊卡牌</h3>
+                    <div class="role-card">
+                        <div class="flex items-center justify-center w-16 h-16 mr-4 bg-primary/30 rounded-full">
+                            <i class="fa fa-virus text-3xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg">传染卡</h4>
+                            <p>如果女巫传染给平民，那么平民会变成女巫阵营。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 安装到手机桌面模态框 -->
+    <div id="installModal" class="modal">
+        <div class="absolute inset-0 bg-black/70" id="installOverlay"></div>
+        <div class="modal-content relative z-10">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold text-shadow-glow">安装到手机桌面</h2>
+                <button id="closeInstallBtn" class="text-2xl hover:text-accent transition-colors">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <p class="mb-4">将《女巫镇》安装到您的手机桌面，随时畅玩！</p>
+                
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-secondary">iOS 设备</h3>
+                    <div class="add-to-home">
+                        <div class="add-to-home-step">
+                            <div class="step-number">1</div>
+                            <div>
+                                <p>打开 Safari 浏览器，访问本页面</p>
+                            </div>
+                        </div>
+                        <div class="add-to-home-step">
+                            <div class="step-number">2</div>
+                            <div>
+                                <p>点击底部的 "分享" 按钮</p>
+                            </div>
+                        </div>
+                        <div class="add-to-home-step">
+                            <div class="step-number">3</div>
+                            <div>
+                                <p>选择 "添加到主屏幕"</p>
+                            </div>
+                        </div>
+                        <div class="add-to-home-step">
+                            <div class="step-number">4</div>
+                            <div>
+                                <p>点击 "添加" 完成</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-secondary">Android 设备</h3>
+                    <div class="add-to-home">
+                        <div class="add-to-home-step">
+                            <div class="step-number">1</div>
+                            <div>
+                                <p>打开 Chrome 浏览器，访问本页面</p>
+                            </div>
+                        </div>
+                        <div class="add-to-home-step">
+                            <div class="step-number">2</div>
+                            <div>
+                                <p>点击右上角的 "菜单" 按钮</p>
+                            </div>
+                        </div>
+                        <div class="add-to-home-step">
+                            <div class="step-number">3</div>
+                            <div>
+                                <p>选择 "添加到主屏幕" 或 "安装应用"</p>
+                            </div>
+                        </div>
+                        <div class="add-to-home-step">
+                            <div class="step-number">4</div>
+                            <div>
+                                <p>点击 "添加" 完成</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-6">
+                    <p class="text-lg font-bold text-accent">安装完成后，您可以直接从手机桌面启动《女巫镇》！</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 小镇告示栏模态框 -->
+    <div id="noticeModal" class="modal">
+        <div class="absolute inset-0 bg-black/70" id="noticeOverlay"></div>
+        <div class="modal-content relative z-10">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold text-shadow-glow">小镇告示栏</h2>
+                <button id="closeNoticeBtn" class="text-2xl hover:text-accent transition-colors">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <div class="glass-effect p-6 rounded-xl">
+                    <p class="text-lg mb-4">特别感谢以下小镇改革家对小镇开发过程中的支持，小镇将永远记住你们！</p>
+                    <p class="text-sm italic mb-2">（排名不分先后）</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                        <div class="bg-dark/50 p-4 rounded-lg text-center">
+                            <p class="text-lg font-bold text-secondary">坤坤先生</p>
+                        </div>
+                        <div class="bg-dark/50 p-4 rounded-lg text-center">
+                            <p class="text-lg font-bold text-secondary">薇薇小姐</p>
+                        </div>
+                        <div class="bg-dark/50 p-4 rounded-lg text-center">
+                            <p class="text-lg font-bold text-secondary">李源琦大王</p>
+                        </div>
+                        <div class="bg-dark/50 p-4 rounded-lg text-center">
+                            <p class="text-lg font-bold text-secondary">煎饼女士</p>
+                        </div>
+                        <div class="bg-dark/50 p-4 rounded-lg text-center">
+                            <p class="text-lg font-bold text-secondary">昊昊先生</p>
+                        </div>
+                        <div class="bg-dark/50 p-4 rounded-lg text-center">
+                            <p class="text-lg font-bold text-secondary">美女丁小姐</p>
+                        </div>
+                        <div class="bg-dark/50 p-4 rounded-lg text-center md:col-span-2">
+                            <p class="text-lg font-bold text-secondary">洋秘女士</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <p class="text-light/70">女巫镇全体居民敬上</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取按钮和模态框元素
+            const startGameBtn = document.getElementById('startGameBtn');
+            const gameRulesBtn = document.getElementById('gameRulesBtn');
+            const installBtn = document.getElementById('installBtn');
+            const noticeBtn = document.getElementById('noticeBtn');
+            
+            const gameRulesModal = document.getElementById('gameRulesModal');
+            const installModal = document.getElementById('installModal');
+            const noticeModal = document.getElementById('noticeModal');
+            
+            const closeRulesBtn = document.getElementById('closeRulesBtn');
+            const closeInstallBtn = document.getElementById('closeInstallBtn');
+            const closeNoticeBtn = document.getElementById('closeNoticeBtn');
+            
+            const gameRulesOverlay = document.getElementById('gameRulesOverlay');
+            const installOverlay = document.getElementById('installOverlay');
+            const noticeOverlay = document.getElementById('noticeOverlay');
+            
+            // 开始游戏按钮点击事件
+            startGameBtn.addEventListener('click', function() {
+                // 添加点击动画效果
+                gsap.to(startGameBtn, {
+                    scale: 0.95,
+                    duration: 0.1,
+                    onComplete: function() {
+                        gsap.to(startGameBtn, {
+                            scale: 1,
+                            duration: 0.1,
+                            onComplete: function() {
+                                // 跳转到游戏链接
+                                window.location.href = 'http://118.31.222.7:8000/';
+                            }
+                        });
+                    }
+                });
+            });
+            
+            // 游戏规则按钮点击事件
+            gameRulesBtn.addEventListener('click', function() {
+                // 添加点击动画效果
+                gsap.to(gameRulesBtn, {
+                    scale: 0.95,
+                    duration: 0.1,
+                    onComplete: function() {
+                        gsap.to(gameRulesBtn, {
+                            scale: 1,
+                            duration: 0.1,
+                            onComplete: function() {
+                                // 显示游戏规则模态框
+                                gameRulesModal.classList.add('active');
+                                // 添加淡入动画
+                                gsap.fromTo(gameRulesModal.querySelector('.modal-content'), 
+                                    { opacity: 0, y: 20 },
+                                    { opacity: 1, y: 0, duration: 0.3 }
+                                );
+                            }
+                        });
+                    }
+                });
+            });
+            
+            // 安装到手机桌面按钮点击事件
+            installBtn.addEventListener('click', function() {
+                // 添加点击动画效果
+                gsap.to(installBtn, {
+                    scale: 0.95,
+                    duration: 0.1,
+                    onComplete: function() {
+                        gsap.to(installBtn, {
+                            scale: 1,
+                            duration: 0.1,
+                            onComplete: function() {
+                                // 显示安装模态框
+                                installModal.classList.add('active');
+                                // 添加淡入动画
+                                gsap.fromTo(installModal.querySelector('.modal-content'), 
+                                    { opacity: 0, y: 20 },
+                                    { opacity: 1, y: 0, duration: 0.3 }
+                                );
+                            }
+                        });
+                    }
+                });
+            });
+            
+            // 小镇告示栏按钮点击事件
+            noticeBtn.addEventListener('click', function() {
+                // 添加点击动画效果
+                gsap.to(noticeBtn, {
+                    scale: 0.95,
+                    duration: 0.1,
+                    onComplete: function() {
+                        gsap.to(noticeBtn, {
+                            scale: 1,
+                            duration: 0.1,
+                            onComplete: function() {
+                                // 显示告示栏模态框
+                                noticeModal.classList.add('active');
+                                // 添加淡入动画
+                                gsap.fromTo(noticeModal.querySelector('.modal-content'), 
+                                    { opacity: 0, y: 20 },
+                                    { opacity: 1, y: 0, duration: 0.3 }
+                                );
+                            }
+                        });
+                    }
+                });
+            });
+            
+            // 关闭游戏规则模态框
+            function closeGameRulesModal() {
+                // 添加淡出动画
+                gsap.fromTo(gameRulesModal.querySelector('.modal-content'), 
+                    { opacity: 1, y: 0 },
+                    { opacity: 0, y: 20, duration: 0.3, onComplete: function() {
+                        gameRulesModal.classList.remove('active');
+                    }}
+                );
+            }
+            
+            // 关闭安装模态框
+            function closeInstallModal() {
+                // 添加淡出动画
+                gsap.fromTo(installModal.querySelector('.modal-content'), 
+                    { opacity: 1, y: 0 },
+                    { opacity: 0, y: 20, duration: 0.3, onComplete: function() {
+                        installModal.classList.remove('active');
+                    }}
+                );
+            }
+            
+            // 关闭告示栏模态框
+            function closeNoticeModal() {
+                // 添加淡出动画
+                gsap.fromTo(noticeModal.querySelector('.modal-content'), 
+                    { opacity: 1, y: 0 },
+                    { opacity: 0, y: 20, duration: 0.3, onComplete: function() {
+                        noticeModal.classList.remove('active');
+                    }}
+                );
+            }
+            
+            // 绑定关闭按钮事件
+            closeRulesBtn.addEventListener('click', closeGameRulesModal);
+            closeInstallBtn.addEventListener('click', closeInstallModal);
+            closeNoticeBtn.addEventListener('click', closeNoticeModal);
+            
+            // 点击遮罩层关闭模态框
+            gameRulesOverlay.addEventListener('click', closeGameRulesModal);
+            installOverlay.addEventListener('click', closeInstallModal);
+            noticeOverlay.addEventListener('click', closeNoticeModal);
+            
+            // 阻止模态框内容点击事件冒泡
+            gameRulesModal.querySelector('.modal-content').addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            installModal.querySelector('.modal-content').addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            noticeModal.querySelector('.modal-content').addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            // 添加键盘事件，ESC键关闭模态框
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    if (gameRulesModal.classList.contains('active')) {
+                        closeGameRulesModal();
+                    }
+                    if (installModal.classList.contains('active')) {
+                        closeInstallModal();
+                    }
+                    if (noticeModal.classList.contains('active')) {
+                        closeNoticeModal();
+                    }
+                }
+            });
+            
+            // 添加页面加载动画
+            gsap.fromTo('.container > *', 
+                { opacity: 0, y: 30 },
+                { opacity: 1, y: 0, duration: 0.8, stagger: 0.2, ease: 'power3.out' }
+            );
+            
+            // 添加按钮悬停效果
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    gsap.to(this, { scale: 1.05, duration: 0.2 });
+                });
+                
+                button.addEventListener('mouseleave', function() {
+                    gsap.to(this, { scale: 1, duration: 0.2 });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
