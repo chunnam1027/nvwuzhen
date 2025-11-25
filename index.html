@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>女巫镇 - 引导页面</title>
+    <title>女巫镇(Salem Online)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- GSAP 动画库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     
@@ -25,6 +27,7 @@
                     },
                     fontFamily: {
                         sans: ['Inter', 'system-ui', 'sans-serif'],
+                        serif: ['Playfair Display', 'Georgia', 'serif'],
                     },
                     animation: {
                         'float': 'float 3s ease-in-out infinite',
@@ -62,7 +65,7 @@
         
         body {
             background-color: theme('colors.darker');
-            background-image: url('https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/8637e7dd2cd64dec977f26c4e71f4faf~tplv-a9rns2rl98-image.image?rcl=202511251736347A7B4A580931B066B70A&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1766655432&x-signature=5SH6ORX6B%2BbY6Wkedq1HPjqOzcc%3D');
+            background-image: url('https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/c14ea43e48cd45e4936a8f4b606ac163~tplv-a9rns2rl98-image.image?rcl=202511251758556FADEA4E67B2AF9A134D&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1766656768&x-signature=BZpwF%2B7oLlLBU8orDj2iogo1J7U%3D');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -70,19 +73,42 @@
         }
         
         .btn-primary {
-            @apply bg-gradient-to-r from-primary to-secondary text-white font-bold py-4 px-8 rounded-full shadow-lg btn-hover;
+            @apply bg-gradient-to-r from-[#4A4A4A] to-[#2D2D2D] text-white font-bold py-4 px-8 rounded-lg shadow-lg btn-hover border-2 border-[#6A6A6A] relative overflow-hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            @apply absolute inset-0 bg-gradient-to-r from-[#6A6A6A]/30 to-transparent transform -skew-x-12 translate-x-[-100%] transition-transform duration-700;
+        }
+        
+        .btn-primary:hover::before {
+            @apply translate-x-[100%];
         }
         
         .btn-secondary {
-            @apply bg-gradient-to-r from-secondary to-accent text-white font-bold py-4 px-8 rounded-full shadow-lg btn-hover;
+            @apply bg-gradient-to-r from-[#4A4A4A] to-[#2D2D2D] text-white font-bold py-4 px-8 rounded-lg shadow-lg btn-hover border-2 border-[#6A6A6A] relative overflow-hidden;
+        }
+        
+        .btn-secondary::before {
+            content: '';
+            @apply absolute inset-0 bg-gradient-to-r from-[#6A6A6A]/30 to-transparent transform -skew-x-12 translate-x-[-100%] transition-transform duration-700;
+        }
+        
+        .btn-secondary:hover::before {
+            @apply translate-x-[100%];
         }
         
         .btn-tertiary {
-            @apply bg-gradient-to-r from-accent to-primary text-white font-bold py-4 px-8 rounded-full shadow-lg btn-hover;
+            @apply bg-gradient-to-r from-[#4A4A4A] to-[#2D2D2D] text-white font-bold py-4 px-8 rounded-lg shadow-lg btn-hover border-2 border-[#6A6A6A] relative overflow-hidden;
         }
         
-        .btn-quaternary {
-            @apply bg-gradient-to-r from-dark to-darker text-light font-bold py-4 px-8 rounded-full shadow-lg btn-hover border border-primary/30;
+        .btn-tertiary::before {
+            content: '';
+            @apply absolute inset-0 bg-gradient-to-r from-[#6A6A6A]/30 to-transparent transform -skew-x-12 translate-x-[-100%] transition-transform duration-700;
+        }
+        
+        .btn-tertiary:hover::before {
+            @apply translate-x-[100%];
         }
         
         .modal {
@@ -123,108 +149,43 @@
     </style>
 </head>
 <body class="font-sans text-light">
-    <!-- 页面容器 -->
-    <div class="container mx-auto px-4 py-12 flex flex-col items-center justify-center min-h-screen">
-        <!-- 横屏提示 -->
-        <div class="fixed top-4 left-0 right-0 flex justify-center z-40">
-            <div class="bg-red-800/80 backdrop-blur-sm px-6 py-2 rounded-full shadow-lg animate-pulse-slow">
-                <p class="text-white font-bold flex items-center">
-                    <i class="fa fa-exclamation-triangle mr-2"></i>
-                    请将手机横屏过来！
-                </p>
-            </div>
+    <!-- 横屏提示 (默认显示) -->
+    <div id="orientationNotice" class="fixed inset-0 flex flex-col items-center justify-center bg-black/90 z-50">
+        <div class="text-center p-8 max-w-md">
+            <i class="fa fa-exclamation-triangle text-red-600 text-6xl mb-6 animate-pulse"></i>
+            <h2 class="text-3xl font-bold text-white mb-4">请将手机横屏！</h2>
+            <p class="text-lg text-gray-300">为了获得最佳游戏体验，请将您的设备横屏后再继续。</p>
         </div>
+    </div>
+
+    <!-- 页面容器 (默认隐藏，横屏后显示) -->
+    <div id="mainContent" class="container mx-auto px-4 py-12 flex flex-col items-center justify-center min-h-screen hidden">
         
         <!-- 游戏标题 -->
-        <div class="text-center mb-12 animate-float">
-            <h1 class="text-5xl md:text-7xl font-bold mb-4 text-shadow-glow">
-                <span class="bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
-                    女巫镇
-                </span>
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-serif font-medium mb-4 text-white text-shadow">
+                女巫镇
             </h1>
-            <p class="text-xl md:text-2xl text-shadow">在女巫镇中找出隐藏的女巫，保护平民安全</p>
+            <p class="text-base md:text-lg text-shadow">1692年的塞勒姆，充满了谎言和欺骗...</p>
         </div>
         
         <!-- 按钮容器 -->
-        <div class="flex flex-col items-center space-y-6 w-full max-w-md">
-            <button id="startGameBtn" class="btn-primary w-full text-lg md:text-xl flex items-center justify-center">
+        <div class="flex flex-col md:flex-row flex-wrap justify-center gap-4 w-full max-w-4xl">
+            <button id="startGameBtn" class="btn-primary text-lg md:text-xl flex items-center justify-center flex-1 min-w-[200px]">
                 <i class="fa fa-play-circle mr-2"></i> 开始游戏
             </button>
             
-            <button id="gameRulesBtn" class="btn-secondary w-full text-lg md:text-xl flex items-center justify-center">
-                <i class="fa fa-book mr-2"></i> 游戏规则
-            </button>
-            
-            <button id="installBtn" class="btn-tertiary w-full text-lg md:text-xl flex items-center justify-center">
+            <button id="installBtn" class="btn-secondary text-lg md:text-xl flex items-center justify-center flex-1 min-w-[200px]">
                 <i class="fa fa-download mr-2"></i> 安装到手机桌面
             </button>
             
-            <button id="noticeBtn" class="btn-quaternary w-full text-lg md:text-xl flex items-center justify-center">
+            <button id="noticeBtn" class="btn-tertiary text-lg md:text-xl flex items-center justify-center flex-1 min-w-[200px]">
                 <i class="fa fa-bullhorn mr-2"></i> 小镇告示栏
             </button>
         </div>
     </div>
     
-    <!-- 游戏规则模态框 -->
-    <div id="gameRulesModal" class="modal">
-        <div class="absolute inset-0 bg-black/70" id="gameRulesOverlay"></div>
-        <div class="modal-content relative z-10">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-3xl font-bold text-shadow-glow">游戏规则</h2>
-                <button id="closeRulesBtn" class="text-2xl hover:text-accent transition-colors">
-                    <i class="fa fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="space-y-6">
-                <div>
-                    <h3 class="text-xl font-bold mb-2 text-secondary">基本规则</h3>
-                    <p class="mb-4">给怀疑的人打7张X，就可以翻对方一张身份牌。翻出女巫牌，平民就获胜；杀了所有平民，女巫就获胜。</p>
-                </div>
-                
-                <div>
-                    <h3 class="text-xl font-bold mb-2 text-secondary">角色介绍</h3>
-                    
-                    <div class="role-card">
-                        <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/defe8fe0b4b5410cb5624f7221c63ecc~tplv-a9rns2rl98-image.image?rcl=20251125173224C582E5EE3DCB79D11D1B&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1766655175&x-signature=GvoLZsUI6YhlLHsILNko5KygSQs%3D" alt="女巫" class="role-icon">
-                        <div>
-                            <h4 class="font-bold text-lg">女巫</h4>
-                            <p>隐藏在平民中的反派角色，目标是传染所有平民或杀死所有平民。</p>
-                        </div>
-                    </div>
-                    
-                    <div class="role-card">
-                        <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/a33d85ae2ac2425bb6f500050dc0e572~tplv-a9rns2rl98-image.image?rcl=20251125173224C582E5EE3DCB79D11D1B&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1766655175&x-signature=%2BV34Uc1iJrNZp9oT0%2Bj0SGdf0rM%3D" alt="平民" class="role-icon">
-                        <div>
-                            <h4 class="font-bold text-lg">平民</h4>
-                            <p>普通角色，需要通过推理找出隐藏的女巫，保护自己不被传染。</p>
-                        </div>
-                    </div>
-                    
-                    <div class="role-card">
-                        <img src="https://p9-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/84a1e0cc6eae4733b7c3dfa1aa88d469~tplv-a9rns2rl98-image.image?rcl=20251125173224C582E5EE3DCB79D11D1B&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1766655176&x-signature=pqvzX30wuhwYIXpB0p2m4f6gWx4%3D" alt="警长" class="role-icon">
-                        <div>
-                            <h4 class="font-bold text-lg">警长</h4>
-                            <p>特殊平民角色，可以在夜里保护一个玩家不会被杀死。</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div>
-                    <h3 class="text-xl font-bold mb-2 text-secondary">特殊卡牌</h3>
-                    <div class="role-card">
-                        <div class="flex items-center justify-center w-16 h-16 mr-4 bg-primary/30 rounded-full">
-                            <i class="fa fa-virus text-3xl"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-lg">传染卡</h4>
-                            <p>如果女巫传染给平民，那么平民会变成女巫阵营。</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
     
     <!-- 安装到手机桌面模态框 -->
     <div id="installModal" class="modal">
@@ -358,6 +319,27 @@
     <script>
         // 页面加载完成后执行
         document.addEventListener('DOMContentLoaded', function() {
+            // 检测屏幕方向并显示相应内容
+            function checkOrientation() {
+                const orientationNotice = document.getElementById('orientationNotice');
+                const mainContent = document.getElementById('mainContent');
+                
+                // 检查窗口宽高比，大于1表示横屏
+                if (window.innerWidth / window.innerHeight > 1) {
+                    orientationNotice.classList.add('hidden');
+                    mainContent.classList.remove('hidden');
+                } else {
+                    orientationNotice.classList.remove('hidden');
+                    mainContent.classList.add('hidden');
+                }
+            }
+            
+            // 初始检查
+            checkOrientation();
+            
+            // 监听窗口大小变化和方向变化
+            window.addEventListener('resize', checkOrientation);
+            window.addEventListener('orientationchange', checkOrientation);
             // 获取按钮和模态框元素
             const startGameBtn = document.getElementById('startGameBtn');
             const gameRulesBtn = document.getElementById('gameRulesBtn');
